@@ -1,0 +1,14 @@
+<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Проверка камеры · 0.7</title><style>body{margin:0;background:#14291f;color:white;font:16px system-ui;padding:16px}video{display:block;width:100%;height:55svh;object-fit:cover;background:#08110c;border-radius:16px}button,a{display:inline-block;padding:14px;margin:8px 6px 8px 0;border:0;border-radius:10px;background:#d5ed87;color:#14291f;font:inherit}p{line-height:1.5;overflow-wrap:anywhere}[hidden]{display:none!important}</style><h1>Проверка камеры · 0.7</h1><p>Здесь нет картинки, GPS и каталога. Видео остаётся на телефоне.</p><video autoplay playsinline muted id="camera"></video><button id="start">Включить камеру</button><button id="stop">Выключить</button><p id="state" role="status">Камера ещё не запрашивалась.</p><p id="environment"></p><a href="./">Вернуться в сад</a><noscript>JavaScript не работает. Откройте HTTPS-ссылку непосредственно в Safari или Chrome, а не просмотрщик файла.</noscript><script>
+const video=document.getElementById('camera'),status=document.getElementById('state'),start=document.getElementById('start');let stream=null,epoch=0;
+document.getElementById('environment').textContent='HTTPS: '+(isSecureContext?'да':'нет')+' · API камеры: '+(navigator.mediaDevices?.getUserMedia?'доступен':'недоступен');
+function stop(){epoch++;stream?.getTracks().forEach(t=>t.stop());stream=null;video.srcObject=null;start.disabled=false;status.textContent='Камера выключена.'}
+document.getElementById('stop').onclick=stop;
+start.onclick=async()=>{stop();const ticket=epoch;start.disabled=true;status.textContent='Ожидаем разрешение на камеру…';try{
+if(!isSecureContext||!navigator.mediaDevices?.getUserMedia)throw {name:'SecureContextRequired'};
+const acquired=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:'environment'}}});
+if(ticket!==epoch){acquired.getTracks().forEach(t=>t.stop());return}
+stream=acquired;video.srcObject=stream;await video.play();if(ticket!==epoch)return;
+const side=stream.getVideoTracks()[0]?.getSettings?.().facingMode;status.textContent='Видеопоток запущен'+(side==='user'?' · выбрана передняя камера':side==='environment'?' · задняя камера':'')+'. Если живое изображение видно здесь, проблема в основном интерфейсе.';
+}catch(e){if(ticket!==epoch)return;stream?.getTracks().forEach(t=>t.stop());stream=null;video.srcObject=null;const messages={NotAllowedError:'Доступ запрещён. Разрешите камеру для этого сайта в настройках браузера.',NotFoundError:'Камера не найдена.',NotReadableError:'Камера занята или недоступна.',SecureContextRequired:'Откройте HTTPS-ссылку непосредственно в Safari или Chrome.'};status.textContent=(e.name||'Ошибка')+': '+(messages[e.name]||e.message||'Не удалось получить видео.')}finally{if(ticket===epoch)start.disabled=false}};
+window.addEventListener('pagehide',stop);
+</script></html>

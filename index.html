@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#183e33"><script>try{if(navigator.maxTouchPoints>0&&Math.min(screen.width,screen.height)<=900)document.documentElement.classList.add('phone-layout')}catch{}</script><title>Сад рядом — тестовый путеводитель</title>
+<meta name="description" content="Тестовый путеводитель по Ботаническому саду СПбГУ. Реальные точки съёмки, демонстрационные названия и метровые зоны деревьев.">
+<style>
+:root{--bg:#f5f4ed;--paper:#fffef9;--green:#193f33;--muted:#64726a;--line:#dddfd3;--accent:#d5ed87;--soft:#e9edde;--ochre:#b46a2d;--radius:22px}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--green);font-family:Inter,Arial,sans-serif;font-size:15px}button,input{font:inherit}button{cursor:pointer;color:inherit}button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #a66b20;outline-offset:4px}button:disabled{cursor:default;opacity:.45}button{border:0}svg.icon{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}[hidden]{display:none!important}a{color:inherit}.shell{max-width:1480px;margin:auto;display:grid;grid-template-columns:205px 1fr;min-height:100vh}.sidebar{border-right:1px solid var(--line);padding:32px 23px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}.brand{display:flex;gap:10px;align-items:center;font-size:24px;font-family:Georgia,serif;font-weight:bold;letter-spacing:-.8px}.brand-mark{width:38px;height:44px;background:var(--green);color:var(--accent);border-radius:18px 18px 18px 4px;display:grid;place-items:center}.brand-mark svg{width:26px;height:26px}.brand-sub{margin:13px 0 34px;font-size:11px;line-height:1.6;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}.nav{display:grid;gap:8px}.nav button{display:flex;align-items:center;gap:13px;text-align:left;padding:13px 14px;border-radius:13px;background:transparent;color:var(--muted)}.nav button.active{background:var(--green);color:white}.nav button:hover:not(.active){background:var(--soft)}.side-bottom{margin-top:auto;font-size:12px;color:var(--muted);line-height:1.6}.side-bottom .stamp{display:inline-flex;align-items:center;gap:6px;border:1px solid #b3c3a0;border-radius:20px;padding:4px 9px;color:var(--green);font-size:10px;letter-spacing:.08em;margin-bottom:9px}.dot{height:6px;width:6px;background:#7e9e43;border-radius:50%;display:inline-block}.workspace{padding:30px 38px 24px;min-width:0}.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:25px}.eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.16em;color:var(--muted);font-weight:600}.top-actions{display:flex;align-items:center;gap:12px}.badge{display:inline-flex;align-items:center;gap:6px;background:var(--soft);border:1px solid #d2dac6;padding:7px 10px;border-radius:30px;font-size:11px;white-space:nowrap}.quiet{background:transparent;text-decoration:underline;text-underline-offset:4px;font-size:12px}.heading{display:flex;align-items:end;justify-content:space-between;gap:14px;margin-bottom:24px}.heading h1{font-family:Georgia,serif;font-size:37px;font-weight:400;line-height:1.12;letter-spacing:-1px;margin:0 0 10px}.heading p{font-size:13px;line-height:1.6;margin:0;color:var(--muted);max-width:670px}.count{font-size:12px;white-space:nowrap;line-height:1.7;color:var(--muted);text-align:right}.count b{font-size:27px;color:var(--green);display:block;font-weight:400}.camera-layout{display:grid;grid-template-columns:minmax(340px,1fr) 285px;gap:24px;align-items:start}.viewer{height:405px;background:#223d31;position:relative;overflow:hidden;border-radius:var(--radius);isolation:isolate;touch-action:pan-y}.scene{width:100%;height:100%;position:absolute;inset:0;object-fit:cover}.scene-svg{transition:transform .25s;transform-origin:50% 60%}#video{width:100%;height:100%;object-fit:cover;background:#16251c}.vignette{position:absolute;inset:0;background:linear-gradient(0deg,rgba(11,26,18,.85),transparent 48%,rgba(11,26,18,.24));pointer-events:none}.viewer-top{position:absolute;top:17px;left:17px;right:17px;display:flex;align-items:center;justify-content:space-between;gap:8px;color:white}.glass{background:#183327b8;border:1px solid #ffffff30;border-radius:30px;padding:8px 10px;backdrop-filter:blur(12px);font-size:10px;letter-spacing:.06em}.viewer-top button{color:white;background:#183327b8;border:1px solid #ffffff30;border-radius:50%;width:35px;height:35px;display:grid;place-items:center}.crosshair{width:84px;height:84px;position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);color:#ffffffa8}.crosshair.ready{color:var(--accent)}.crosshair svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2}.crosshair:after{content:'';position:absolute;left:calc(50% - 2px);top:calc(50% - 2px);background:currentColor;border-radius:50%;width:4px;height:4px}.target-label{position:absolute;left:50%;top:27%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;max-width:90%;white-space:nowrap;background:var(--accent);color:#183e33;padding:11px 14px;border-radius:12px;box-shadow:0 5px 20px #0003;font-size:12px;transition:left .2s;z-index:2}.target-label:after{content:'';position:absolute;bottom:-7px;left:50%;border:7px solid transparent;border-top-color:var(--accent);border-bottom:0}.target-label .icon{width:17px}.view-bottom{position:absolute;bottom:20px;left:23px;right:23px;display:flex;justify-content:space-between;align-items:end;color:white;gap:12px}.view-distance{font-size:36px;letter-spacing:-1.3px;line-height:1.1;font-weight:300}.view-distance small{font-size:15px;letter-spacing:0}.view-caption{font-size:11px;color:#dbe2d6;margin-top:7px;line-height:1.4}.compass-chip{font-size:11px;border:1px solid #ffffff36;border-radius:9px;padding:8px 9px;text-align:center;min-width:59px}.compass-chip svg{display:block;margin:0 auto 5px;width:19px;height:19px;transition:transform .15s}.status-line{display:flex;align-items:center;gap:10px;margin:14px 0 18px;padding:13px 14px;border-radius:12px;background:#e9ede2;min-height:49px;font-size:12px;line-height:1.4}.status-line.good{background:#dfebc3}.status-line.warn{background:#f2e7d8}.status-line .icon{width:19px}.controls{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:20px}.section-caption{display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:17px}.section-caption small{color:var(--muted);font-size:10px}.step-buttons{display:grid;grid-template-columns:1fr 1fr 1.25fr;gap:7px}.step-buttons button{background:#edf0e7;min-height:43px;border-radius:11px;font-size:11px;font-weight:600;padding:9px 5px;display:flex;align-items:center;justify-content:center;gap:5px}.step-buttons button.primary{background:var(--green);color:white}.step-buttons .num{opacity:.55;font-weight:400}.sliders{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:20px}.slider-label{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);gap:8px;margin-bottom:10px}.slider-label output{font-variant-numeric:tabular-nums;color:var(--green)}input[type=range]{width:100%;height:4px;accent-color:var(--green);cursor:pointer;margin:8px 0 4px}.range-ends{display:flex;justify-content:space-between;font-size:9px;color:#8b948c}.reset-row{margin-top:18px;display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--muted)}.reset-row button{padding:0;font-size:10px}.info-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:22px}.info-card+.info-card{margin-top:16px}.tree-avatar{height:124px;position:relative;background:#edf0e2;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:17px 0}.tree-avatar svg{height:108px;width:110px}.tree-avatar .illus-tag{position:absolute;bottom:8px;right:9px;font-size:8px;color:#849277;letter-spacing:.02em}.tree-meta{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--muted)}.demo-tag{display:inline-block;font-size:9px;padding:4px 7px;border:1px solid #b8c59e;border-radius:5px;color:#567039;letter-spacing:.08em;text-transform:uppercase}.tree-name{font-family:Georgia,serif;font-size:25px;line-height:1.13;font-weight:400;margin:13px 0}.tree-subtitle{color:var(--muted);font-size:11px;line-height:1.6}.meta-row{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-top:1px solid var(--line);font-size:11px;margin-top:12px}.meta-row span{color:var(--muted)}.map-link{display:flex;align-items:center;justify-content:space-between;width:100%;background:transparent;font-size:11px;padding:14px 0 0;color:var(--green);border-top:1px solid var(--line)}.info-card h3{font-size:12px;font-weight:600;margin:0 0 13px}.small-list{display:grid;gap:13px;font-size:11px;line-height:1.5;color:var(--muted)}.small-list div{display:flex;gap:10px}.small-list i{font-style:normal;flex:none;background:#edf0e4;color:#4d6548;border-radius:50%;width:21px;height:21px;text-align:center;line-height:21px;font-size:10px}.small-list b{color:var(--green);font-weight:500}.bottom-note{margin:22px 0 0;color:var(--muted);font-size:10px;line-height:1.7;display:flex;gap:8px;align-items:start}.bottom-note .icon{width:15px;height:15px;flex:none;margin-top:2px}.choices{background:#f3e9db;border:1px solid #decdb7;border-radius:15px;padding:15px;margin-bottom:15px;font-size:12px}.choices p{margin:0 0 10px;line-height:1.5}.choices button{display:block;width:100%;text-align:left;padding:10px;margin-top:5px;background:var(--paper);border-radius:8px;font-size:12px}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 16px}.search{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0;width:100%;color:var(--green)}.text-button{background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:11px 14px;font-size:11px;white-space:nowrap}.catalog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.catalog-item{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:17px;text-align:left;transition:transform .15s}.catalog-item:hover{transform:translateY(-3px);box-shadow:0 6px 17px #193f3310}.catalog-item .tree-avatar{height:105px;margin:10px 0}.catalog-item .tree-name{font-size:23px}.catalog-item .tree-avatar svg{height:90px}.catalog-item small{font-size:10px;color:var(--muted)}.empty{padding:35px;background:var(--paper);border-radius:15px;text-align:center;color:var(--muted)}.map-shell{border:1px solid var(--line);border-radius:20px;background:#ecf0e4;overflow:hidden;position:relative}#gardenMap{width:100%;height:550px;display:block;touch-action:none}#gardenMap .tree-zone{fill:#aac48a22;stroke:#79925d;stroke-width:.11}#gardenMap .map-dot{fill:#54743c;stroke:#f7f8ef;stroke-width:.12}#gardenMap .map-tree{cursor:pointer}#gardenMap .map-tree.selected .tree-zone{fill:#d9ed8555;stroke:#244d35;stroke-width:.25}#gardenMap .map-tree.selected .map-dot{fill:#193f33}.map-over{position:absolute;top:15px;left:15px;right:15px;display:flex;justify-content:space-between;gap:10px;pointer-events:none}.map-over>*{pointer-events:auto}.map-tools{display:flex;gap:5px}.map-tools button{background:#fffef9e6;border:1px solid #d1d8c8;border-radius:9px;min-width:35px;height:35px;font-size:16px}.map-tools .all-map{font-size:10px;padding:0 10px}.map-hint{position:absolute;bottom:15px;left:15px;right:15px;pointer-events:none;background:#fffef9e6;border-radius:10px;padding:11px 14px;font-size:11px;line-height:1.5}.map-summary{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:15px 0;font-size:12px}.map-summary b{font-weight:500}.map-summary button{background:var(--green);color:white;padding:12px 16px;border-radius:11px;font-size:11px}.map-legend{font-size:11px;color:var(--muted);display:flex;gap:17px;flex-wrap:wrap}.map-legend span{display:flex;align-items:center;gap:7px}.legend-circle{width:12px;height:12px;border:1px solid #79925d;border-radius:50%;background:#c5d4b2}.legend-visitor{width:10px;height:10px;border-radius:50%;background:#c37935}.diag{margin-top:20px;border-top:1px solid var(--line);padding-top:14px;font-size:11px;color:var(--muted);line-height:1.6}.diag summary{cursor:pointer;color:var(--green)}.diag button{margin:10px 6px 8px 0}.diag-note{padding:10px;background:#efeee7;border-radius:9px;overflow-wrap:anywhere}.saved-count{font-variant-numeric:tabular-nums}.page-footer{border-top:1px solid var(--line);margin-top:28px;padding-top:13px;color:#889286;font-size:10px;display:flex;justify-content:space-between;gap:12px}dialog{padding:0;border:1px solid #d4dbc8;border-radius:24px;max-width:490px;width:calc(100% - 30px);background:var(--paper);color:var(--green);max-height:90dvh;overflow:auto;box-shadow:0 25px 100px #0003}dialog::backdrop{background:#102b22a3;backdrop-filter:blur(5px)}.modal-body{padding:28px}.modal-top{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted)}.close-dialog{background:#edf0e5;width:31px;height:31px;border-radius:50%;display:grid;place-items:center;font-size:20px}.modal-body .tree-avatar{height:180px;margin:20px 0}.modal-body .tree-avatar svg{height:160px;width:160px}.modal-body .tree-name{font-size:34px;margin:20px 0 12px}.modal-description{font-family:Georgia,serif;font-size:18px;line-height:1.65;color:#3f5849}.demo-warning{background:#edf0e3;border:1px solid #dbe2c9;border-radius:11px;padding:11px 13px;font-size:11px;line-height:1.6;color:#60714f}.card-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0}.card-fields div{border-bottom:1px solid var(--line);padding-bottom:10px;font-size:12px}.card-fields small{display:block;color:var(--muted);font-size:10px;margin-bottom:7px}.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.modal-actions button{border-radius:11px;padding:13px 10px;font-size:12px;background:var(--soft)}.modal-actions button.primary{background:var(--green);color:white}.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:var(--green);color:white;border-radius:12px;padding:13px 19px;font-size:12px;z-index:100;box-shadow:0 6px 30px #0002;max-width:90%;text-align:center}.mobile-brand{display:none}.screen-help{font-size:13px;line-height:1.8;color:var(--muted)}.screen-help ol{padding-left:21px}.screen-help li{margin:10px 0}.screen-help strong{color:var(--green)}
+@media(min-width:1250px){.workspace{padding-left:44px;padding-right:44px}.camera-layout{grid-template-columns:minmax(420px,1fr) 305px}.viewer{height:450px}}@media(max-width:1050px){.shell{grid-template-columns:165px 1fr}.sidebar{padding:26px 15px}.brand{font-size:22px}.workspace{padding:26px}.camera-layout{grid-template-columns:minmax(300px,1fr) 245px;gap:16px}.info-card{padding:17px}.heading h1{font-size:31px}.catalog-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:820px){.shell{display:block}.sidebar{height:66px;position:fixed;inset:auto 0 0;padding:5px 15px calc(5px + env(safe-area-inset-bottom));border:0;border-top:1px solid var(--line);background:#fffef9f5;backdrop-filter:blur(16px);z-index:20;height:calc(66px + env(safe-area-inset-bottom))}.sidebar>.brand,.brand-sub,.side-bottom{display:none}.nav{display:flex;justify-content:space-around;gap:12px}.nav button{flex:1;flex-direction:column;gap:4px;font-size:9px;padding:6px;border-radius:10px;text-align:center;align-items:center}.nav button.active{background:#e7edda;color:var(--green)}.nav .icon{width:21px;height:21px}.workspace{padding:20px 20px 97px}.mobile-brand{display:flex;align-items:center;gap:8px;font-family:Georgia,serif;font-size:24px}.mobile-brand .icon{height:24px;width:24px}.topbar .eyebrow{display:none}.topbar{margin-bottom:23px}.top-actions .quiet{font-size:11px}.top-actions{gap:8px}.heading h1{font-size:33px}.count{display:none}.heading{margin-bottom:20px}.camera-layout{grid-template-columns:minmax(300px,1fr) 245px}.page-footer{margin-bottom:5px}.toast{bottom:85px}}@media(max-width:650px){.workspace{padding:18px 17px 90px}.topbar{margin-bottom:23px}.top-actions .badge{font-size:9px;padding:6px 8px}.top-actions .quiet{font-size:10px}.heading h1{font-size:31px;max-width:340px}.heading p{font-size:12px;line-height:1.6}.camera-layout{display:flex;flex-direction:column;gap:17px}.camera-main{width:100%}.camera-aside{width:100%;display:grid;grid-template-columns:1fr}.camera-aside>.info-card:last-child{display:none}.camera-aside .tree-avatar{display:none}.camera-aside .info-card{padding:18px 20px}.camera-aside .tree-name{font-size:25px}.viewer{height:380px}.controls{padding:18px 16px}.sliders{gap:20px}.step-buttons button{font-size:10px;min-height:44px}.status-line{margin-bottom:14px;font-size:11px}.bottom-note{margin-top:16px}.catalog-grid{gap:10px}.catalog-item{padding:13px;border-radius:14px}.catalog-item .tree-name{font-size:21px}.catalog-item .tree-meta{font-size:9px}.catalog-item .tree-avatar{height:90px}.toolbar{gap:8px}.toolbar .text-button{font-size:10px;padding:12px 8px}.search{font-size:12px;padding:12px}.map-shell{border-radius:15px}#gardenMap{height:480px}.map-summary{font-size:11px;gap:8px}.map-summary button{font-size:10px;padding:11px}.map-hint{font-size:10px}.map-over{left:10px;right:10px;top:10px}.map-over .badge{font-size:9px;padding:6px}.map-tools .all-map{font-size:9px}.modal-body{padding:23px}.modal-body .tree-name{font-size:30px}.page-footer{font-size:9px}.empty{font-size:12px}}@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+.camera-tools{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}.camera-tools button{min-height:44px;white-space:normal}
+body.camera-expanded{overflow:hidden}#viewer.field-camera{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;height:100svh!important;border-radius:0!important;z-index:200;touch-action:manipulation}
+#viewer.field-camera .viewer-top{top:max(16px,env(safe-area-inset-top));right:70px}.field-close{position:absolute;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));z-index:8;width:46px;height:46px;border-radius:50%;color:white;background:#163b2ee6;font-size:26px}
+#viewer.field-camera .view-bottom{bottom:190px;left:20px;right:20px}#viewer.field-camera .crosshair{top:42%;pointer-events:none}#viewer.field-camera .target-label{top:28%;white-space:normal;max-width:85%;text-align:left}#viewer.field-camera .target-label:after{display:none}
+.field-hud{position:absolute;bottom:0;left:0;right:0;padding:14px 16px max(16px,env(safe-area-inset-bottom));background:linear-gradient(transparent,#0e261ff5 12%);color:white;z-index:5;font-size:12px;line-height:1.5}.field-hud p{margin:6px 0 12px;max-height:3em;overflow:auto}.field-actions{display:flex;flex-wrap:wrap;gap:6px}.field-actions button{padding:12px 10px;min-height:44px;background:#f3f6e5;color:#193f33;border-radius:10px;font-size:12px}.field-actions button:first-child{flex:1}
+.bearing-panel{position:absolute;z-index:9;left:12px;right:12px;top:64px;background:#fffef9f5;color:#193f33;border:1px solid #d4dec5;border-radius:14px;padding:12px;font-size:12px}.bearing-panel p{margin:5px 0 10px;line-height:1.4}.bearing-panel button{padding:12px;border-radius:9px;background:#193f33;color:white;margin-right:5px}.bearing-panel button:disabled{opacity:.45}.bearing-panel button:last-child{background:#e9ecdf;color:#193f33}.target-label:after{border-top-color:inherit}
+@media(max-height:500px){#viewer.field-camera .view-bottom{bottom:125px}.field-hud{padding-top:8px}.field-hud p{max-height:1.5em;margin:3px 0 5px}.bearing-panel{left:10px;right:auto;width:270px;top:60px}#viewer.field-camera .target-label{top:22%}}
+
+html.phone-layout .shell{display:block}html.phone-layout .sidebar{height:66px;position:fixed;inset:auto 0 0;padding:5px 15px calc(5px + env(safe-area-inset-bottom));border:0;border-top:1px solid var(--line);background:#fffef9f5;backdrop-filter:blur(16px);z-index:20;height:calc(66px + env(safe-area-inset-bottom))}html.phone-layout .sidebar>.brand,html.phone-layout .brand-sub,html.phone-layout .side-bottom{display:none}html.phone-layout .nav{display:flex;justify-content:space-around;gap:12px}html.phone-layout .nav button{flex:1;flex-direction:column;gap:4px;font-size:9px;padding:6px;border-radius:10px;text-align:center;align-items:center}html.phone-layout .nav button.active{background:#e7edda;color:var(--green)}html.phone-layout .nav .icon{width:21px;height:21px}html.phone-layout .workspace{padding:20px 20px 97px}html.phone-layout .mobile-brand{display:flex;align-items:center;gap:8px;font-family:Georgia,serif;font-size:24px}html.phone-layout .mobile-brand .icon{height:24px;width:24px}html.phone-layout .topbar .eyebrow{display:none}html.phone-layout .topbar{margin-bottom:23px}html.phone-layout .top-actions .quiet{font-size:11px}html.phone-layout .top-actions{gap:8px}html.phone-layout .heading h1{font-size:33px}html.phone-layout .count{display:none}html.phone-layout .heading{margin-bottom:20px}html.phone-layout .camera-layout{grid-template-columns:minmax(300px,1fr) 245px}html.phone-layout .page-footer{margin-bottom:5px}html.phone-layout .toast{bottom:85px}html.phone-layout .workspace{padding:18px 17px 90px}html.phone-layout .topbar{margin-bottom:23px}html.phone-layout .top-actions .badge{font-size:9px;padding:6px 8px}html.phone-layout .top-actions .quiet{font-size:10px}html.phone-layout .heading h1{font-size:31px;max-width:340px}html.phone-layout .heading p{font-size:12px;line-height:1.6}html.phone-layout .camera-layout{display:flex;flex-direction:column;gap:17px}html.phone-layout .camera-main{width:100%}html.phone-layout .camera-aside{width:100%;display:grid;grid-template-columns:1fr}html.phone-layout .camera-aside>.info-card:last-child{display:none}html.phone-layout .camera-aside .tree-avatar{display:none}html.phone-layout .camera-aside .info-card{padding:18px 20px}html.phone-layout .camera-aside .tree-name{font-size:25px}html.phone-layout .viewer{height:380px}html.phone-layout .controls{padding:18px 16px}html.phone-layout .sliders{gap:20px}html.phone-layout .step-buttons button{font-size:10px;min-height:44px}html.phone-layout .status-line{margin-bottom:14px;font-size:11px}html.phone-layout .bottom-note{margin-top:16px}html.phone-layout .catalog-grid{gap:10px}html.phone-layout .catalog-item{padding:13px;border-radius:14px}html.phone-layout .catalog-item .tree-name{font-size:21px}html.phone-layout .catalog-item .tree-meta{font-size:9px}html.phone-layout .catalog-item .tree-avatar{height:90px}html.phone-layout .toolbar{gap:8px}html.phone-layout .toolbar .text-button{font-size:10px;padding:12px 8px}html.phone-layout .search{font-size:12px;padding:12px}html.phone-layout .map-shell{border-radius:15px}html.phone-layout #gardenMap{height:480px}html.phone-layout .map-summary{font-size:11px;gap:8px}html.phone-layout .map-summary button{font-size:10px;padding:11px}html.phone-layout .map-hint{font-size:10px}html.phone-layout .map-over{left:10px;right:10px;top:10px}html.phone-layout .map-over .badge{font-size:9px;padding:6px}html.phone-layout .map-tools .all-map{font-size:9px}html.phone-layout .modal-body{padding:23px}html.phone-layout .modal-body .tree-name{font-size:30px}html.phone-layout .page-footer{font-size:9px}html.phone-layout .empty{font-size:12px}html{-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-anchor:none}body{overflow-x:clip}.workspace,.camera-main,.camera-aside{min-width:0}.topbar,.top-actions{flex-wrap:wrap}.sensor-start{min-height:245px}.sensor-start [aria-live]{height:108px;overflow:auto}#statusLine{min-height:76px;height:76px;overflow:auto}#gpsStatusLine,#orientationStatus{overflow-wrap:anywhere}input,textarea,select{font-size:16px!important}html.phone-layout .camera-layout{display:flex;flex-direction:column}html.phone-layout .workspace{width:100%;padding:18px 17px 100px}html.phone-layout .topbar{gap:12px}html.phone-layout .viewer{height:380px}html.phone-layout .catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr))}html.phone-layout .bearing-panel{max-width:calc(100% - 24px)}html.phone-layout .map-summary{flex-wrap:wrap}html.phone-layout .search{min-height:44px}
+.camera-empty{position:absolute;inset:65px 14px 95px;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:white;background:#16251cf2;border-radius:16px;padding:18px;overflow:auto}.camera-empty strong{font-size:20px}.camera-empty p{font-size:14px;line-height:1.5;max-width:420px}.camera-empty button{background:var(--accent);color:var(--green);padding:14px 22px;border-radius:12px;font-weight:600;min-height:48px}#cameraPage > .viewer{height:clamp(360px,62svh,580px);margin-bottom:20px}#cameraPage > .heading{display:none}.camera-aside .tree-avatar{display:none}#demoScene{display:none!important}.camera-candidates{position:absolute;bottom:12px;left:12px;right:12px;z-index:4;background:#142c24ed;color:white;border:1px solid #ffffff30;border-radius:14px;padding:12px;font-size:12px}.camera-candidates p{line-height:1.45;margin:6px 0}.camera-candidate-buttons{display:flex;gap:6px;overflow-x:auto}.camera-candidate-buttons button{flex:0 0 auto;min-height:44px;padding:9px 12px;border-radius:10px;background:#e8c994;color:#183e33;font-size:12px;max-width:220px;white-space:normal;text-align:left}.camera-sensor-actions{display:flex;gap:8px;flex-wrap:wrap}.camera-sensor-actions button{min-height:40px;padding:8px;border-radius:8px;background:#e9edde;color:#183e33;margin-top:7px}.has-live-candidates .view-bottom{display:none}.field-camera .camera-candidates{bottom:170px}.camera-expanded .camera-candidates{max-height:42svh;overflow:auto}</style></head><body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-leaf" viewBox="0 0 24 24"><path d="M20 4C9 2 3 7 5 14c1 5 8 7 12 2 3-4 3-8 3-12Z"/><path d="M3 22 15 10M8 16l1-6m3 2 5-1"/></symbol>
+<symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 6h4l2-3h4l2 3h4v14H4Z"/><circle cx="12" cy="12" r="4"/></symbol>
+<symbol id="i-map" viewBox="0 0 24 24"><path d="m3 5 6-2 6 3 6-2v15l-6 2-6-3-6 2ZM9 3v15m6-12v15"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M3 4h6c2 0 3 1 3 2 0-1 1-2 3-2h6v15h-6c-2 0-3 1-3 2 0-1-1-2-3-2H3Zm9 2v15"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.1"/></symbol>
+<symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 1v4m0 14v4M1 12h4m14 0h4"/></symbol>
+<symbol id="i-compass" viewBox="0 0 24 24"><path d="m12 3 6 17-6-3-6 3Z"/></symbol>
+<symbol id="tree-illustration" viewBox="0 0 180 180"><ellipse cx="90" cy="159" rx="50" ry="8" fill="#d2dec0"/><path d="M84 151 87 76h8l3 75 12 8H72Z" fill="#8c8465"/><g fill="#78965a"><ellipse cx="65" cy="81" rx="32" ry="35"/><ellipse cx="112" cy="82" rx="35" ry="34"/><ellipse cx="88" cy="53" rx="35" ry="34"/></g><g fill="#a2b979"><ellipse cx="69" cy="59" rx="22" ry="27"/><ellipse cx="104" cy="51" rx="23" ry="26"/></g><g fill="none" stroke="#5c7647" stroke-width="2" opacity=".65"><path d="m91 126-1-56m1 32-24-24m24 14 25-21"/></g></symbol>
+</defs></svg>
+<div class="shell"><aside class="sidebar"><div class="brand"><span class="brand-mark"><svg class="icon"><use href="#i-leaf"/></svg></span>Сад рядом</div><div class="brand-sub">Ботанический сад<br>СПбГУ · прототип</div>
+<nav class="nav" aria-label="Главная навигация"><button data-tab="camera" class="active" aria-current="page"><svg class="icon"><use href="#i-camera"/></svg>Камера</button><button data-tab="map"><svg class="icon"><use href="#i-map"/></svg>План сада</button><button data-tab="catalog"><svg class="icon"><use href="#i-book"/></svg>Каталог</button></nav>
+<div class="side-bottom"><span class="stamp"><span class="dot"></span>ТЕСТОВАЯ СБОРКА</span><br>144 точки из съёмки.<br>Истории пока придуманы.<br><br><span class="saved-count">0</span> карточек открыто</div></aside>
+<main class="workspace"><div id="bootNotice" class="demo-warning" role="alert">Если кнопки не реагируют, откройте сайт в Safari или Chrome по HTTPS-ссылке. Предпросмотр HTML-файла может не запускать JavaScript.</div><header class="topbar"><div class="eyebrow">Прогулка начинается с любопытства</div><div class="mobile-brand"><svg class="icon"><use href="#i-leaf"/></svg>Сад рядом</div><div class="top-actions"><span class="badge"><span class="dot"></span>ПОЛЕВОЙ ТЕСТ · V0.12</span><button class="quiet" id="helpButton">Как проверить</button></div></header>
+<section id="cameraPage"><div class="sensor-start" style="background:#fffef9;border:1px solid #d8dfce;border-radius:16px;padding:18px;margin-bottom:20px">
+<button id="startSensors" style="background:#193f33;color:white;width:100%;padding:16px;border-radius:12px;font-size:15px;font-weight:600">Начать прогулку</button>
+<div class="camera-tools"><button class="text-button" id="retryGPS">Включить геопозицию</button><button class="text-button" id="retryOrientation">Включить компас</button></div>
+<p style="font-size:12px;line-height:1.6;color:#687660;margin:12px 0">Кнопка запускает запросы компаса, геопозиции и камеры. Если один из них не появился — нажмите его отдельную кнопку. При сохранённом разрешении или запрете нового окна может не быть. Видео и координаты остаются на телефоне.</p>
+<div aria-live="polite" style="font-size:12px;line-height:1.7"><div id="cameraStatus">Камера: ещё не включена.</div><div id="gpsStatusLine">Геолокация: ещё не запрашивалась.</div><div id="orientationStatus">Направление: ещё не запрашивалось.</div></div>
+<details class="diag"><summary>Safari не спрашивает разрешение</summary><p>Геопозиция: откройте меню страницы Safari → настройки веб-сайта → геопозиция. Разрешите доступ или выберите запрос. Также проверьте службы геолокации iPhone и доступ для веб-сайтов Safari. Затем повторите «Включить геопозицию».</p><p>Компас: нажмите «Включить компас» непосредственно на странице. Если Safari возвращает запрет, проверьте доступ к движению и ориентации в настройках Safari (если этот пункт есть в вашей версии). Перезагрузите страницу и повторите. Отсутствие показаний само по себе не означает запрет.</p></details><p style="font-size:11px;color:#687660;margin-bottom:0">При неточном GPS нажмите «Я у дерева — выбрать на плане», отметьте свой экземпляр и подтвердите выбор. Камера не распознаёт изображение; автоматический выбор пока недостоверен.</p></div><div class="viewer" id="viewer"><button id="closeField" class="field-close" hidden aria-label="Выйти из камеры на весь экран">×</button>
+<div id="bearingPanel" class="bearing-panel" hidden><strong>Настройка направления</strong><p id="bearingHint">Наведите прицел на выбранный ориентир.</p><button id="captureBearing">Зафиксировать направление</button><button id="cancelBearing">Отмена</button></div>
+<div id="demoScene" hidden></div>
+<video id="video" autoplay playsinline muted hidden></video><div id="cameraEmpty" class="camera-empty"><strong>Камера не включена</strong><p id="cameraEmptyMessage" role="status">Нажмите кнопку и разрешите доступ к камере.</p><button id="cameraEmptyStart">Включить камеру</button><a href="camera-check.html" style="color:white;margin-top:12px;font-size:13px">Проверить камеру отдельно</a></div><div class="vignette"></div><div class="viewer-top"><span class="glass" id="sceneMode">СИМУЛЯЦИЯ · ПОЗИЦИЯ ТЕСТОВАЯ</span><button id="cameraButton" title="Включить камеру телефона" aria-label="Включить камеру телефона"><svg class="icon"><use href="#i-camera"/></svg></button></div>
+<button class="target-label" id="targetLabel" hidden><svg class="icon"><use href="#i-leaf"/></svg><span id="targetName"></span><svg class="icon"><use href="#i-arrow"/></svg></button>
+<div id="cameraCandidates" class="camera-candidates" hidden><strong id="cameraCandidateTitle">GPS и компас</strong><p id="cameraCandidateStatus" role="status"></p><div id="cameraCandidateButtons" hidden class="camera-candidate-buttons"></div><div class="camera-sensor-actions"><button id="cameraGPSAction">Найти моё положение</button><button id="cameraHeadingAction">Включить компас</button></div></div><div class="crosshair" id="crosshair"><svg viewBox="0 0 84 84"><path d="M4 24V9q0-5 5-5h15m36 0h15q5 0 5 5v15M4 60v15q0 5 5 5h15m36 0h15q5 0 5-5V60"/></svg></div>
+<div class="view-bottom"><div><div class="view-distance"><span id="distanceValue">2,4</span> <small>м</small></div><div class="view-caption" id="viewCaption">до выбранного дерева · нужно подойти</div></div><div class="compass-chip"><svg class="icon" id="directionArrow"><use href="#i-compass"/></svg><span id="angleValue">32°</span></div></div><div class="field-hud" id="fieldHud" hidden><div id="fieldSensorLine"></div><p id="fieldHint"></p><div class="field-actions"><button id="fieldStart">Запустить / возобновить</button><button id="fieldOrient">Ориентир</button><button id="fieldMap">План</button><button id="fieldStop">Выключить камеру</button></div></div></div>
+<div class="heading"><div><h1>Подойдите. Наведите.<br>Познакомьтесь.</h1><p>У каждого дерева — своя карточка. GPS помогает найти кандидатов рядом; радиус дерева — 3 метра.</p></div><div class="count"><b>3 м</b>радиус знакомства</div></div>
+
+<div style="display:flex;gap:8px;margin:12px 0"><button class="text-button" id="liveMode" aria-pressed="true">GPS телефона</button><button class="text-button" id="demoMode" aria-pressed="false">Симуляция дома</button></div>
+<div class="camera-tools"><button class="text-button" id="chooseTreeOnMap">Я у дерева — выбрать на плане</button></div>
+<div id="manualTreeCard" class="info-card" hidden><strong>Вы выбрали дерево вручную</strong><p id="manualTreeName"></p><p>Это ваш выбор на плане, а не распознавание камерой. Он действует до 2 минут и сбрасывается при смене точки или удалении более чем на 20 м по GPS.</p><button class="text-button" id="openManualTree">Открыть карточку</button><button class="text-button" id="clearTreeChoice">Сбросить выбор</button></div>
+<div id="correctionStatus" class="demo-warning"></div><details class="diag"><summary>Уточнить положение и направление</summary><p>Необязательно: если вы точно знаете своё место или ориентир на плане. Поправки временные и не повышают измеренную точность GPS.</p><button class="text-button" id="positionCorrection">Уточнить позицию</button><button class="text-button" id="directionCorrection">Уточнить направление</button><button class="text-button" id="clearCorrection">Сбросить поправки</button></details>
+<div class="camera-tools"><button class="text-button" id="expandCamera">Камера на весь экран</button><button class="text-button" id="retryCamera">Перезапустить камеру</button></div><div class="camera-layout"><div class="camera-main"><div class="status-line" id="statusLine" role="status"><svg class="icon"><use href="#i-target"/></svg><span id="statusText">Подойдите ближе: карточка доступна в радиусе 3 м.</span></div>
+<div id="ambiguity" class="choices" hidden><p>В прицел попало несколько деревьев. Выберите экземпляр — автоматически угадывать его не будем.</p><div id="candidateList"></div></div>
+<div id="liveCandidates" hidden class="info-card"><h3>Деревья рядом</h3><p id="nearbySummary" style="font-size:12px;line-height:1.6"></p><div id="nearbyList"></div></div><div class="controls" id="demoControls" hidden><div class="section-caption"><strong>Попробуйте прямо сейчас</strong><small>без прогулки по саду</small></div><div class="step-buttons"><button id="approachButton"><span class="num">01</span> Подойти</button><button id="aimButton"><span class="num">02</span> Навести</button><button id="openButton" class="primary" disabled><span class="num">03</span> Открыть карточку</button></div>
+<div class="sliders"><label><span class="slider-label">Расстояние <output id="distanceOutput">2,4 м</output></span><input id="distanceSlider" aria-label="Тестовое расстояние до дерева" type="range" min="0.1" max="4" step="0.1" value="2.4"><span class="range-ends"><span>0,1 м</span><span>4 м</span></span></label><label><span class="slider-label">Куда направлена камера <output id="angleOutput">32°</output></span><input id="angleSlider" aria-label="Отклонение тестового направления камеры" type="range" min="-70" max="70" step="1" value="32"><span class="range-ends"><span>влево</span><span>вправо</span></span></label></div>
+<div class="reset-row"><span>Зелёная подпись появится в прицеле</span><button class="quiet" id="resetButton">Начать заново</button></div></div>
+<div class="bottom-note"><svg class="icon"><use href="#i-info"/></svg><span>В режиме GPS положение берётся с телефона. При неточной позиции или направлении автоматическая подпись скрывается. Названия деревьев пока условные.</span></div></div>
+<aside class="camera-aside"><div class="info-card" id="selectedTreePanel"><div class="tree-meta"><span id="selectedNumber">ДЕМО-003</span><span class="demo-tag">Демо</span></div><div class="tree-avatar"><svg><use href="#tree-illustration"/></svg><span class="illus-tag">условная иллюстрация</span></div><h2 class="tree-name" id="selectedName"></h2><p class="tree-subtitle">Условное название. Вид, возраст и инвентарный номер пока не установлены.</p><div class="meta-row"><span>Зона знакомства</span><b>радиус 3 м</b></div><button id="showMapButton" class="map-link">Найти на плане<svg class="icon"><use href="#i-arrow"/></svg></button></div>
+<div class="info-card"><h3>Одна точка — одна карточка</h3><div class="small-list"><div><i>1</i><span><b>Подойдите к дереву.</b><br>Войдите в его метровую зону.</span></div><div><i>2</i><span><b>Наведите прицел на ствол.</b><br>Автоматическая подпись появится только после проверки привязки и при достаточной точности датчиков.</span></div><div><i>3</i><span><b>Коснитесь подписи.</b><br>Прочитайте его историю.</span></div></div></div></aside></div>
+<details class="diag"><summary>Проверка камеры и геолокации телефона</summary><p>GPS пересчитывается в координаты плана. Датчик ориентации управляет направлением задней камеры. Общая точность привязки ещё требует проверки на контрольных точках.</p><button class="text-button" id="cameraDiagButton">Включить камеру</button><button class="text-button" id="gpsButton">Проверить GPS</button><p id="cameraTechnical"></p><button class="text-button" id="copyDiagnostics">Скопировать состояние для проверки</button><textarea id="diagnosticsText" readonly hidden aria-label="Состояние полевого теста" style="width:100%;height:160px"></textarea><div class="diag-note" id="sensorStatus">Разрешения пока не запрашивались. Местоположение и видео не отправляются на сервер.</div><label class="slider-label" style="margin-top:15px">Тестовая погрешность позиции <output id="accuracyOutput">0 м</output></label><input aria-label="Тестовая погрешность координат" id="accuracySlider" type="range" min="0" max="10" step="0.1" value="0"><p>При погрешности, не позволяющей подтвердить нахождение внутри 3 м, подпись не выдаёт уверенное определение дерева.</p></details></section>
+<section id="mapPage" hidden><div class="heading"><div><h1>Каждое дерево<br>на своём месте.</h1><p>144 обозначения из присланной съёмки. Окружность вокруг каждого — радиус 3 метра.</p></div></div><div class="map-shell"><svg id="gardenMap" role="img" aria-label="Интерактивный план съёмки с деревьями и метровыми зонами"></svg><div class="map-over"><span class="badge">ПОЗИЦИЯ · GPS / СИМУЛЯЦИЯ</span><div class="map-tools"><button id="zoomIn" aria-label="Приблизить">+</button><button id="zoomOut" aria-label="Отдалить">−</button><button class="all-map" id="fitMap">Весь участок</button></div></div><div class="map-hint" id="mapActionHint">Нажмите на дерево, чтобы выбрать его. В режиме GPS оранжевая точка показывает положение телефона.</div></div><div class="map-summary"><span><b id="mapSelectedName"></b><br><small id="mapDistance"></small></span><button id="backCamera">Проверить в камере →</button></div><div class="map-legend"><span><i class="legend-circle"></i>дерево и зона 3 м</span><span><i class="legend-visitor"></i>положение посетителя</span></div><p class="bottom-note">В режиме GPS оранжевая точка показывает пересчитанное положение телефона. Привязка предварительная; инвентарный реестр ещё не сопоставлен.</p></section>
+<section id="catalogPage" hidden><div class="heading"><div><h1>Истории будущих<br>знакомств.</h1><p>Названия и описания придуманы для теста. Координаты обозначений взяты из вашей съёмки.</p></div><div class="count"><b>144</b>демонстрационные карточки</div></div><div class="toolbar"><input id="searchInput" class="search" type="search" placeholder="Название или номер, например 003" aria-label="Поиск по тестовому каталогу"><button class="text-button" id="savedFilter" aria-pressed="false">Открытые · <span class="saved-count">0</span></button></div><div class="catalog-grid" id="catalogGrid"></div><div class="empty" id="catalogEmpty" hidden>Карточки не найдены. Измените запрос или отключите фильтр.</div></section>
+<footer class="page-footer"><span>Ботанический сад СПбГУ · тестовый прототип</span><span>Данные съёмки + вымышленные истории</span></footer></main></div>
+<dialog id="treeDialog" aria-labelledby="dialogName"><div class="modal-body"><div class="modal-top"><span id="dialogNumber"></span><button class="close-dialog" aria-label="Закрыть карточку" id="closeTree">×</button></div><div class="tree-avatar"><svg><use href="#tree-illustration"/></svg><span class="illus-tag">не фотография экземпляра</span></div><span class="demo-tag">Демонстрационная карточка</span><h2 class="tree-name" id="dialogName"></h2><p id="dialogDescription" class="modal-description"></p><div class="demo-warning">Название и история вымышлены. Они нужны только для проверки сайта и не описывают реальное дерево на этой точке.</div><div class="card-fields"><div><small>Тестовый номер</small><span id="dialogCode"></span></div><div><small>Радиус зоны</small><span>3 метра</span></div><div><small>Вид и возраст</small><span>Не установлены</span></div><div><small>Инвентарный номер</small><span>Не сопоставлен</span></div></div><div class="modal-actions"><button id="dialogMap">Показать на плане</button><button id="dialogCamera" class="primary">Проверить наведение</button></div></div></dialog>
+<dialog id="helpDialog" aria-labelledby="helpTitle"><div class="modal-body"><div class="modal-top"><span>САД РЯДОМ · V0.12</span><button class="close-dialog" aria-label="Закрыть инструкцию" id="closeHelp">×</button></div><h2 class="tree-name" id="helpTitle">Прогулка за одну минуту</h2><div class="screen-help"><ol><li>В режиме «Симуляция дома» нажмите <strong>«Подойти»</strong>: расстояние станет 0,7 м.</li><li>Нажмите <strong>«Навести»</strong>: тестовое направление будет выставлено на выбранное дерево.</li><li>Нажмите на зелёную подпись или <strong>«Открыть карточку»</strong>.</li><li>Выберите другое дерево на плане или в каталоге и повторите.</li></ol><p>Отведите направление в сторону или увеличьте расстояние больше 3 м — карточка через прицел перестанет открываться. Из каталога карточки доступны всегда.</p><p>Для прогулки выберите <strong>GPS телефона</strong> и нажмите «Начать прогулку». Если отдельный запрос не появился, используйте кнопки «Включить геопозицию» и «Включить компас» над камерой. Для проверки дома выберите «Симуляция дома». Точность GPS и привязки не гарантирует различение соседних деревьев в радиусе 3 м.</p></div><button class="text-button" id="startDemo" style="width:100%;margin-top:10px;background:var(--green);color:white">Попробовать симуляцию</button></div></dialog>
+<div id="toast" class="toast" role="status" hidden></div>
+<script id="catalogData" type="application/json">{"trees": [{"id": "SURVEY-194EF", "demoNumber": "ДЕМО-010", "name": "Берёза", "description": "Берёза повислая с белой корой и тонкими свисающими ветвями. Выдуманная история для проверки: её посадили студенты-биологи в 1957 году.", "x": 112605.9904581839, "y": 94869.49640329098, "z": 3.46, "radius": 3, "sourceHandle": "194EF", "inventoryId": null, "botanicalName": "Betula pendula (демо)", "demo": true, "longitude": 30.29584741526296, "latitude": 59.94120896371343}, {"id": "SURVEY-194F0", "demoNumber": "ДЕМО-011", "name": "Ель", "description": "Ель обыкновенная с густой тёмной кроной. Выдуманная история для проверки: её пересадили сюда из питомника сада молодым саженцем в 1972 году.", "x": 112614.6072007411, "y": 94875.16404017662, "z": 0.0, "radius": 3, "sourceHandle": "194F0", "inventoryId": null, "botanicalName": "Picea abies (демо)", "demo": true, "longitude": 30.296002014291144, "latitude": 59.94125948876263}], "context": [{"layer": "GP_Дальний Восток_дорожки", "points": [[112631.1306, 94922.4005], [112632.1116, 94921.2373], [112632.9326, 94919.9636], [112633.5846, 94918.5955], [112634.0584, 94917.1496], [112634.0592, 94917.1463], [112633.7474, 94917.0482], [112633.6198, 94916.9919], [112633.5542, 94916.9789], [112633.4879, 94916.9715], [112633.3392, 94916.9258], [112633.1688, 94916.863], [112633.0278, 94916.8044], [112632.9092, 94916.7907], [112632.8393, 94916.772], [112632.6209, 94916.6987], [112632.62, 94916.702], [112632.2106, 94917.987], [112631.6396, 94919.2024], [112630.9153, 94920.3332], [112630.0461, 94921.3642], [112627.4899, 94924.0503], [112627.2703, 94924.2133], [112627.0158, 94924.2918], [112626.7497, 94924.2826], [112626.4951, 94924.1826], [112628.491, 94925.3945], [112629.3273, 94924.2954], [112631.1306, 94922.4005]]}, {"layer": "GP_Дальний Восток_дорожки", "points": [[112633.1957, 94919.4641], [112633.7049, 94919.5041], [112634.2117, 94919.5653], [112634.7155, 94919.6478], [112635.2156, 94919.7513], [112635.6304, 94919.8678], [112636.0327, 94920.0196], [112636.4204, 94920.2057], [112636.7912, 94920.4251], [112637.0557, 94920.6357], [112637.2961, 94920.8721], [112637.5105, 94921.1324], [112637.697, 94921.4144], [112638.4169, 94922.7513], [112638.9516, 94923.6269], [112639.6307, 94924.3848], [112640.4354, 94925.0078], [112641.3471, 94925.4785], [112642.0966, 94925.886], [112642.8746, 94926.4186], [112643.5556, 94927.0625], [112644.1278, 94927.8047], [112644.5796, 94928.6322], [112644.8365, 94929.2602], [112643.6535, 94930.3672], [112642.7087, 94931.6658], [112642.024, 94933.1185], [112641.6217, 94934.6879], [112641.5728, 94934.8635], [112641.4866, 94935.0216], [112641.3673, 94935.1564], [112641.2187, 94935.2621], [112643.0197, 94935.8747], [112643.227, 94934.3112], [112643.7693, 94932.8505], [112644.62, 94931.5452], [112645.7527, 94930.4478], [112646.6491, 94929.8232], [112647.5997, 94929.29], [112648.5976, 94928.8519], [112649.6359, 94928.5121], [112650.5231, 94928.1959], [112651.3777, 94927.8042], [112652.1948, 94927.3393], [112652.9697, 94926.8039], [112653.3121, 94926.4765], [112653.6364, 94926.1316], [112653.9419, 94925.7701], [112654.2281, 94925.3926]]}, {"layer": "GP_Дальний Восток_дорожки", "points": [[112637.8797, 94900.2075], [112637.8032, 94900.1589], [112637.6195, 94900.0232], [112637.4283, 94899.8989], [112637.2299, 94899.7863], [112637.0249, 94899.6856], [112636.8858, 94899.6035], [112636.7505, 94899.5154], [112636.6192, 94899.4215], [112636.492, 94899.3219], [112636.0846, 94898.9993], [112635.9033, 94898.8469], [112635.7461, 94898.6712], [112635.6153, 94898.4751], [112635.5129, 94898.2615], [112635.3838, 94897.9938], [112635.2213, 94897.7464], [112635.028, 94897.5224], [112634.806, 94897.3248], [112634.5468, 94897.1451], [112634.2779, 94896.9806], [112634.0001, 94896.8319], [112633.714, 94896.6991], [112633.4941, 94896.6123], [112633.2659, 94896.5545], [112633.0321, 94896.5264], [112632.7957, 94896.5284], [112632.5426, 94896.5384], [112632.2917, 94896.5141], [112632.0464, 94896.4561], [112631.8102, 94896.3648], [112631.3717, 94896.1741], [112630.8711, 94896.0393], [112630.4119, 94895.9364], [112630.2686, 94895.8744], [112630.1449, 94895.7825], [112630.0453, 94895.6648], [112629.9743, 94895.5257], [112629.8861, 94895.1654], [112629.8051, 94894.9332], [112629.483, 94894.3389], [112628.6925, 94892.5938], [112628.404, 94892.0299], [112627.9671, 94891.3002], [112627.891, 94891.1663], [112627.8059, 94891.0382], [112627.712, 94890.9164], [112627.6097, 94890.8012], [112627.3622, 94890.5377], [112627.264, 94890.4209], [112627.1796, 94890.2943], [112627.1098, 94890.1592], [112627.0551, 94890.0167], [112626.9901, 94889.8359], [112626.9124, 94889.6605], [112626.8223, 94889.4911], [112626.72, 94889.3284], [112626.5526, 94889.3691], [112626.3852, 94889.4098], [112626.2178, 94889.4506], [112626.0504, 94889.4913], [112626.2177, 94889.7166], [112626.3642, 94889.9554], [112626.489, 94890.2061], [112626.5914, 94890.4673], [112626.7204, 94890.758], [112626.8846, 94891.0288], [112627.0818, 94891.2767], [112627.3098, 94891.4983], [112627.4608, 94891.652], [112627.5924, 94891.8217], [112627.7033, 94892.0055], [112627.7924, 94892.2017], [112627.9216, 94892.6093], [112628.0889, 94893.0019], [112628.2929, 94893.3766], [112628.5324, 94893.7309], [112628.6297, 94893.8876], [112628.7166, 94894.0502], [112628.793, 94894.2179], [112628.8585, 94894.3904], [112628.9007, 94894.5959], [112628.9313, 94894.8032], [112628.9503, 94895.0119], [112628.9577, 94895.2216], [112628.9926, 94895.4638], [112629.0462, 94895.7022], [112629.1182, 94895.9357], [112629.2083, 94896.1632], [112629.302, 94896.4143], [112629.3789, 94896.6708], [112629.439, 94896.9317], [112629.4819, 94897.1963], [112629.469, 94897.4636], [112629.4431, 94897.7299], [112629.4044, 94897.9946], [112629.3529, 94898.2572], [112629.3267, 94898.4759], [112629.3134, 94898.6806], [112629.2892, 94898.8842], [112629.2541, 94899.0862], [112629.2082, 94899.2861], [112629.1271, 94899.4646], [112629.0251, 94899.631], [112628.9033, 94899.7836], [112628.7631, 94899.9206], [112628.4537, 94900.2287], [112628.3423, 94900.3438], [112628.2342, 94900.4619], [112628.1292, 94900.5829], [112628.0276, 94900.7067], [112627.7688, 94901.048], [112627.6573, 94901.2001], [112627.5368, 94901.3449], [112627.4075, 94901.4819], [112627.2699, 94901.6108], [112627.7087, 94902.1738], [112628.232, 94901.7319], [112628.4053, 94901.5787], [112628.5614, 94901.4088], [112628.6989, 94901.2236], [112628.8167, 94901.0245], [112628.9173, 94900.8713], [112629.0283, 94900.7258], [112629.1492, 94900.5884], [112629.2796, 94900.4597], [112629.3812, 94900.354], [112629.6081, 94900.0642], [112629.7828, 94899.7431], [112629.9021, 94899.3975], [112629.9629, 94899.0344], [112629.9905, 94898.9077], [112630.0388, 94898.7277], [112630.0811, 94898.5464], [112630.1172, 94898.3637], [112630.1472, 94898.1798], [112630.1429, 94897.9936], [112630.1348, 94897.8076], [112630.123, 94897.6218], [112630.1075, 94897.4363], [112630.105, 94897.3212], [112630.1184, 94897.2074], [112630.1476, 94897.0966], [112630.1921, 94896.9905], [112630.2694, 94896.8869], [112630.37, 94896.8096], [112630.4876, 94896.762], [112630.616, 94896.7478], [112630.824, 94896.7456], [112631.0316, 94896.7544], [112631.2384, 94896.7742], [112631.4441, 94896.805], [112631.6232, 94896.8588], [112631.8343, 94896.9388], [112632.0499, 94897.0052], [112632.2693, 94897.0577], [112632.4918, 94897.0963], [112632.8188, 94897.1495], [112632.9978, 94897.1943], [112633.1722, 94897.2537], [112633.341, 94897.3275], [112633.5034, 94897.4153], [112633.9743, 94897.6836], [112634.4124, 94898.0001], [112634.8141, 94898.3616], [112635.1757, 94898.7653], [112635.4185, 94899.1552], [112635.5454, 94899.3216], [112635.6885, 94899.4736], [112635.8465, 94899.61], [112636.0183, 94899.7296], [112636.2012, 94899.8432], [112636.3855, 94899.9543], [112636.5714, 94900.0631], [112636.7586, 94900.1693], [112636.9864, 94900.3081], [112637.2089, 94900.455], [112637.4259, 94900.6098], [112637.6373, 94900.7725]]}, {"layer": "GP_Дальний Восток_дорожки", "points": [[112636.6588, 94888.5052], [112636.531, 94888.2027], [112636.4202, 94887.8939], [112636.3266, 94887.5794], [112636.2505, 94887.2599], [112636.1358, 94886.7005], [112636.0043, 94886.2567], [112635.8014, 94885.8041], [112635.5107, 94885.409], [112635.1435, 94885.0838], [112634.7111, 94884.8408], [112633.7335, 94884.4046], [112633.4115, 94884.2139], [112633.1365, 94883.9653], [112632.9163, 94883.6672], [112632.7584, 94883.3278], [112632.6561, 94883.0327], [112632.553, 94882.7378], [112632.4491, 94882.4432], [112632.3443, 94882.1489], [112632.243, 94881.9703], [112632.1349, 94881.7958], [112632.0201, 94881.6257], [112631.8987, 94881.4602], [112631.1848, 94880.7261], [112630.2984, 94880.2635], [112629.3126, 94880.097], [112628.3003, 94880.251], [112627.6055, 94880.7025], [112627.0632, 94881.3106], [112626.6979, 94882.0388], [112626.5344, 94882.8512], [112626.4776, 94883.4713], [112626.3633, 94884.0821], [112626.1926, 94884.6796], [112625.9662, 94885.2597], [112625.7672, 94885.9271], [112625.7005, 94886.6139], [112625.766, 94887.3009], [112625.9638, 94887.9686], [112625.2949, 94888.1315], [112625.2116, 94887.8133], [112625.1384, 94887.4927], [112625.0756, 94887.1699], [112625.023, 94886.8452], [112624.9962, 94886.6072], [112624.9847, 94886.3681], [112624.9884, 94886.1289], [112625.0074, 94885.8901], [112625.0535, 94885.6556], [112625.1051, 94885.4224], [112625.1621, 94885.1904], [112625.2246, 94884.9598], [112625.4286, 94884.442], [112625.5824, 94883.9084], [112625.6849, 94883.3626], [112625.7355, 94882.8083], [112625.9441, 94881.7709], [112626.4136, 94880.8431], [112627.1116, 94880.0723], [112628.0054, 94879.5058], [112629.2819, 94879.2967], [112630.5284, 94879.497], [112631.6506, 94880.0755], [112632.554, 94881.0013], [112633.1059, 94882.0683], [112633.5631, 94883.0177], [112633.7811, 94883.3843], [112634.0586, 94883.7038], [112634.3881, 94883.9693], [112634.7624, 94884.1737], [112635.3541, 94884.5084], [112635.546, 94884.6411], [112635.722, 94884.7932], [112635.8807, 94884.9633], [112636.0205, 94885.1501], [112636.1328, 94885.3524], [112636.2398, 94885.5575], [112636.3414, 94885.7654], [112636.4377, 94885.9758], [112636.5619, 94886.2308], [112636.6827, 94886.4875], [112636.8, 94886.7459], [112636.9137, 94887.0058], [112636.9765, 94887.1661], [112637.0344, 94887.3281], [112637.0876, 94887.4918], [112637.1359, 94887.657], [112637.228, 94887.963], [112637.3312, 94888.2655], [112637.4453, 94888.5639], [112637.5702, 94888.8581]]}, {"layer": "GP_Дальний Восток_дорожки", "points": [[112655.2737, 94887.5149], [112655.4385, 94888.3691], [112655.5672, 94889.229], [112655.6597, 94890.0936], [112655.7158, 94890.9616], [112655.7565, 94891.4618], [112655.7532, 94891.9627], [112655.706, 94892.4614], [112655.6151, 94892.955], [112655.4974, 94893.8858], [112655.4599, 94894.2645], [112655.3996, 94894.6399], [112655.3167, 94895.0109], [112655.2114, 94895.3766], [112654.8293, 94896.546], [112654.7314, 94896.8081], [112654.6181, 94897.0636], [112654.4898, 94897.312], [112654.3469, 94897.5525], [112654.2995, 94897.6416], [112654.2602, 94897.7344], [112654.2294, 94897.8303], [112654.2073, 94897.9288], [112654.2048, 94897.9485], [112654.2078, 94897.9677], [112654.216, 94897.9853], [112654.2291, 94898.0003], [112654.2458, 94898.0109], [112654.2645, 94898.0163], [112654.2839, 94898.0164], [112654.303, 94898.011], [112654.5582, 94897.9341], [112654.8165, 94897.869], [112655.0776, 94897.8159], [112655.3409, 94897.7747], [112655.6074, 94897.772], [112655.8736, 94897.7796], [112656.1393, 94897.7977], [112656.4042, 94897.8263], [112657.5091, 94897.8923], [112657.7888, 94897.9135], [112658.0628, 94897.9682], [112658.3282, 94898.0557], [112658.582, 94898.1753], [112658.8442, 94898.3263], [112659.1145, 94898.4617], [112659.3922, 94898.581], [112659.6767, 94898.6841], [112659.8439, 94898.7565], [112660.0055, 94898.8401], [112660.161, 94898.9346], [112660.3097, 94899.0398], [112660.2476, 94899.1955], [112660.1846, 94899.3508], [112660.1208, 94899.5057], [112660.0561, 94899.6604], [112659.6417, 94899.4048], [112659.214, 94899.1731], [112658.7739, 94898.9658], [112658.3225, 94898.7835], [112657.9246, 94898.644], [112657.515, 94898.5498], [112657.0975, 94898.5015], [112656.6759, 94898.4997], [112656.2724, 94898.5115], [112655.869, 94898.5269], [112655.4657, 94898.5462], [112655.0626, 94898.5691], [112654.8196, 94898.5873], [112654.5774, 94898.6138], [112654.3362, 94898.6486], [112654.0964, 94898.6917], [112653.8558, 94898.7591], [112653.6248, 94898.8521], [112653.4052, 94898.9697], [112653.1992, 94899.1109], [112652.3485, 94899.795], [112651.9312, 94900.1155], [112651.4872, 94900.3959], [112651.0193, 94900.6344], [112650.5306, 94900.8294], [112649.6348, 94901.1237], [112648.7338, 94901.4011], [112647.8278, 94901.6616], [112646.9169, 94901.9051], [112646.4358, 94902.0088], [112645.9485, 94902.0722], [112645.4577, 94902.0949], [112644.9659, 94902.0768], [112644.2591, 94902.0494], [112643.4584, 94902.0651], [112643.1119, 94902.0714], [112642.7657, 94902.0622], [112642.4202, 94902.0375], [112642.076, 94901.9973], [112641.0408, 94901.8502], [112640.5221, 94901.7881], [112640.012, 94901.6803], [112639.5134, 94901.5276], [112639.0295, 94901.3308]]}, {"layer": "GP_Дальний Восток_дорожки", "points": [[112665.1241, 94885.5246], [112664.8465, 94885.0629], [112664.7313, 94884.7255], [112664.6718, 94884.5557], [112664.6059, 94884.3884], [112664.5335, 94884.2238], [112664.4548, 94884.0621], [112664.3976, 94883.9089], [112664.3618, 94883.7501], [112664.3476, 94883.5879], [112664.3554, 94883.4245], [112664.3825, 94883.0603], [112664.3877, 94882.6955], [112664.3711, 94882.3311], [112664.3327, 94881.968], [112664.3246, 94881.5029], [112664.3781, 94881.0429], [112664.492, 94880.5941], [112664.6653, 94880.1624], [112664.8949, 94879.8708], [112665.1613, 94879.6151], [112665.4605, 94879.3986], [112665.7884, 94879.2248], [112666.639, 94878.747], [112666.9548, 94878.5831], [112667.2831, 94878.4477], [112667.622, 94878.3416], [112667.9696, 94878.2654], [112668.6707, 94878.0951], [112669.5761, 94877.7916], [112670.4263, 94877.5778], [112670.7508, 94877.4816], [112671.0634, 94877.3541], [112671.3619, 94877.1963], [112671.6439, 94877.0093], [112671.9716, 94876.7825], [112672.2913, 94876.5449], [112672.6028, 94876.2966], [112672.9058, 94876.0378], [112673.0663, 94875.8901], [112673.2304, 94875.7465], [112673.398, 94875.6069], [112673.5691, 94875.4715], [112673.7176, 94875.3613], [112673.8767, 94875.2682], [112674.045, 94875.193], [112674.2211, 94875.1365], [112674.2575, 94875.1294], [112674.2943, 94875.1243], [112674.3313, 94875.1213], [112674.3685, 94875.1203]]}, {"layer": "GP_Дальний Восток_дорожки", "points": [[112639.3252, 94900.6588], [112639.8028, 94900.8678], [112640.0403, 94900.9579], [112640.2849, 94901.0237], [112640.5348, 94901.0648], [112640.7883, 94901.0807], [112640.8905, 94901.0825], [112640.9927, 94901.0845], [112641.0949, 94901.0868], [112641.1971, 94901.0895], [112641.3571, 94901.0999], [112641.5165, 94901.1167], [112641.6751, 94901.1398], [112641.8327, 94901.1693], [112642.2247, 94901.2549], [112642.6203, 94901.3204], [112643.0188, 94901.3659], [112643.4192, 94901.3911], [112643.7815, 94901.3861], [112644.1437, 94901.3773], [112644.5058, 94901.3647], [112644.8678, 94901.3482], [112645.7452, 94901.3799], [112646.1688, 94901.393], [112646.5895, 94901.3568], [112647.0032, 94901.2718], [112647.4055, 94901.1388], [112648.1264, 94900.9109], [112650.0647, 94900.3747], [112650.6205, 94900.1557], [112651.1467, 94899.8768], [112651.6385, 94899.5409], [112652.0911, 94899.1509], [112652.3837, 94898.8605], [112652.6605, 94898.5555], [112652.9209, 94898.2364], [112653.1645, 94897.9039], [112654.3668, 94895.8717], [112654.5531, 94895.4764], [112654.6926, 94895.0638], [112654.7844, 94894.6381], [112654.8273, 94894.2032], [112655.0906, 94892.3897], [112655.1378, 94891.7686], [112655.1376, 94891.1466], [112655.0901, 94890.5264], [112654.9956, 94889.9107], [112654.9007, 94889.332], [112654.7945, 94888.7554], [112654.6773, 94888.1809], [112654.5489, 94887.6087]]}, {"layer": "GP_Дальний Восток_дорожки", "points": [[112645.4542, 94928.8123], [112645.223, 94928.2954], [112644.8469, 94927.434], [112644.3213, 94926.6646], [112643.6621, 94926.006], [112642.885, 94925.4773], [112641.5918, 94924.6731], [112640.7427, 94924.0733], [112639.9717, 94923.381], [112639.2863, 94922.604], [112638.694, 94921.7496], [112638.5154, 94921.3719], [112638.308, 94920.9017], [112638.0333, 94920.471], [112637.6965, 94920.0869], [112637.3031, 94919.7564], [112636.86, 94919.503], [112636.3917, 94919.3049], [112635.903, 94919.1638], [112635.3993, 94919.0817], [112634.925, 94919.0239], [112634.4527, 94918.9515], [112633.9829, 94918.8647], [112633.5159, 94918.7635]]}, {"layer": "GP_Дальний Восток_дорожки", "points": [[112644.8365, 94929.2602], [112645.8475, 94928.5553], [112646.9195, 94927.953], [112648.0448, 94927.4573], [112649.2155, 94927.0721], [112649.9579, 94926.8065], [112650.6737, 94926.4794], [112651.3592, 94926.0927], [112652.0105, 94925.6484], [112652.3439, 94925.3207], [112652.6557, 94924.973], [112652.9451, 94924.6064], [112653.2111, 94924.222], [112653.2263, 94924.1975], [112653.2406, 94924.1725], [112653.254, 94924.147], [112653.2665, 94924.121]]}, {"layer": "14_Ограждения", "points": [[112666.4139, 94861.4263], [112665.1509, 94860.6131]]}, {"layer": "14_Ограждения", "points": [[112663.5053, 94862.5901], [112663.8415, 94861.1282]]}, {"layer": "14_Ограждения", "points": [[112672.6988, 94954.745], [112671.0254, 94955.2761]]}, {"layer": "14_Ограждения", "points": [[112671.0162, 94957.8489], [112670.4439, 94956.1639]]}, {"layer": "14_Ограждения", "points": [[112663.0638, 94862.3233], [112662.8152, 94862.4012], [112662.5334, 94862.4976], [112662.793, 94863.2532], [112663.6339, 94862.9643], [112663.3767, 94862.2158], [112663.0638, 94862.3233]]}, {"layer": "14_Ограждения", "points": [[112672.961, 94954.2448], [112672.5182, 94954.0126], [112672.256, 94954.5129], [112672.9202, 94954.8611], [112673.1825, 94954.3608], [112672.961, 94954.2448]]}, {"layer": "14_Ограждения", "points": [[112670.8644, 94958.4979], [112671.1914, 94957.9543], [112670.4964, 94957.5363], [112670.1609, 94958.0892], [112670.8644, 94958.4979]]}, {"layer": "14_Ограждения", "points": [[112666.3635, 94861.3162], [112672.582, 94858.47], [112689.715, 94866.646], [112703.9101, 94874.0786], [112706.818, 94890.005], [112678.771, 94943.025], [112672.961, 94954.2448]]}, {"layer": "14_Ограждения", "points": [[112673.1382, 94954.3376], [112678.9482, 94943.1177], [112707.0272, 94890.0373], [112704.0893, 94873.9467], [112689.8045, 94866.4671], [112672.5838, 94858.2492], [112666.2802, 94861.1343], [112666.4467, 94861.498], [112672.5802, 94858.6908], [112689.6255, 94866.8249], [112703.7308, 94874.2105], [112706.6088, 94889.9727], [112678.5938, 94942.9323], [112672.7839, 94954.1519]]}, {"layer": "14_Ограждения", "points": [[112663.2531, 94862.2582], [112661.0934, 94855.1392], [112660.7107, 94855.2553], [112662.873, 94862.3831]]}, {"layer": "14_Ограждения", "points": [[112641.0589, 94884.304], [112645.41, 94887.421], [112647.886, 94886.796], [112663.1508, 94863.1303]]}, {"layer": "prud_kontur_11.02.26", "points": [[112655.3663, 94918.5627], [112655.182, 94916.854], [112655.359, 94915.655], [112656.257, 94913.311], [112658.169, 94911.315], [112660.835, 94908.693], [112662.561, 94906.239], [112663.377, 94904.561], [112664.423, 94903.024], [112665.528, 94901.822], [112666.951, 94900.534], [112667.757, 94899.509], [112668.078, 94898.72], [112667.988, 94897.507], [112668.149, 94896.012], [112668.091, 94894.688], [112668.118, 94893.506], [112668.345, 94891.766], [112668.419, 94890.467], [112668.884, 94889.449], [112669.865, 94888.625], [112671.242, 94887.976], [112672.378, 94887.674], [112673.872, 94887.496], [112675.165, 94887.616], [112678.342, 94888.279], [112680.866, 94889.716], [112682.108, 94891.171], [112682.69, 94893.299], [112682.213, 94895.529], [112680.628, 94897.725], [112677.821, 94899.152], [112674.912, 94899.903], [112672.059, 94901.13], [112669.336, 94903.099], [112668.107, 94904.288], [112666.944, 94905.622], [112665.816, 94907.632], [112665.068, 94909.787], [112664.37, 94912.297], [112663.743, 94914.513], [112662.754, 94916.729], [112661.53, 94918.568], [112660.24, 94919.799], [112659.519, 94920.332], [112658.427, 94920.667], [112657.187, 94920.574], [112656.664, 94920.357], [112655.635, 94919.13], [112655.366, 94918.562]]}, {"layer": "GP_Дальний Восток_дорожки", "points": [[112673.5049, 94874.0717], [112673.42, 94874.2383], [112673.3263, 94874.3999], [112673.224, 94874.5563], [112673.1133, 94874.7069], [112672.3877, 94875.5994], [112671.99, 94875.9798], [112671.5433, 94876.2961], [112671.055, 94876.5434], [112670.5329, 94876.7173], [112669.495, 94877.0177], [112668.7744, 94877.2579], [112666.4228, 94878.1675], [112665.9969, 94878.3486], [112665.5872, 94878.5621], [112665.1954, 94878.807], [112664.8234, 94879.0821], [112664.5123, 94879.3751], [112664.2441, 94879.7054], [112664.0221, 94880.0684], [112663.8495, 94880.4593], [112663.7903, 94880.7029], [112663.7483, 94880.9498], [112663.7238, 94881.199], [112663.7169, 94881.4496], [112663.6738, 94882.8471], [112663.6846, 94883.2862], [112663.739, 94883.7209], [112663.8365, 94884.1481], [112663.9765, 94884.5644], [112664.356, 94885.529], [112664.6689, 94886.0263]]}, {"layer": "03_Здания и строения", "points": [[112655.947, 94857.738], [112661.0103, 94860.5747], [112660.9245, 94860.7272], [112659.4476, 94863.3519], [112655.759, 94869.9072], [112653.1535, 94874.5376], [112649.4776, 94881.0702], [112646.6082, 94886.1697], [112646.244, 94886.8169], [112640.9592, 94883.8573], [112641.1994, 94883.4323], [112651.1122, 94865.8949], [112652.321, 94863.7564], [112655.4401, 94858.2381], [112655.6123, 94858.3379], [112655.947, 94857.738]]}, {"layer": "03_Здания и строения", "points": [[112575.3605, 94963.2485], [112561.1457, 94955.0083], [112557.3982, 94961.143], [112571.9152, 94969.1968], [112575.3605, 94963.2485]]}, {"layer": "03_Здания и строения", "points": [[112584.6885, 94968.6644], [112581.0377, 94974.5608], [112573.171, 94988.536], [112580.625, 94992.896], [112588.524, 94978.9275], [112587.3883, 94978.2634], [112588.3037, 94976.7657], [112589.2595, 94975.2019], [112590.9573, 94972.4241], [112584.6885, 94968.6644]]}, {"layer": "03_Здания и строения", "points": [[112572.9269, 94872.8651], [112559.6709, 94897.4249], [112553.9775, 94894.3933], [112555.2476, 94892.008], [112557.1587, 94888.4189], [112563.3763, 94876.7424], [112566.1705, 94871.4949], [112563.3359, 94869.9855], [112564.1885, 94868.4104], [112567.1691, 94863.0654], [112575.8318, 94867.6936], [112572.9269, 94872.8651]]}, {"layer": "03_Здания и строения", "points": [[112714.8572, 94845.0197], [112712.6869, 94848.9679], [112708.114, 94857.287], [112710.9168, 94858.8151], [112717.1499, 94862.2134], [112719.4609, 94863.4734], [112719.9274, 94863.7277], [112720.6792, 94864.1376], [112724.1572, 94866.0338], [112727.6998, 94859.536], [112730.6413, 94854.1407], [112730.6627, 94854.1016]]}, {"layer": "03_Здания и строения", "points": [[112659.2514, 94956.4426], [112652.6419, 94967.101], [112650.8897, 94969.9266], [112656.8294, 94973.486], [112660.1608, 94975.4823], [112660.2242, 94975.5202], [112665.8939, 94978.9178], [112672.5627, 94967.7891], [112675.8079, 94962.1817], [112661.0864, 94953.3269], [112659.2514, 94956.4426]]}, {"layer": "03_Здания и строения", "points": [[112528.9477, 94909.4446], [112541.9691, 94916.4424], [112541.3438, 94917.6347], [112548.1122, 94921.1845], [112551.9332, 94913.8294], [112556.3665, 94905.2955], [112560.2899, 94897.7433], [112559.6709, 94897.4249], [112553.9775, 94894.3933], [112553.6464, 94894.226], [112553.2571, 94895.0669], [112544.339, 94890.3817], [112540.4778, 94888.2916]]}, {"layer": "03_Здания и строения", "points": [[112675.0225, 94825.4294], [112666.5071, 94839.5465], [112672.7056, 94843.2855], [112695.7198, 94857.3309], [112703.0854, 94845.0886], [112704.501, 94842.7541], [112705.4077, 94841.2523]]}, {"layer": "03_Здания и строения", "points": [[112733.509, 94903.9395], [112725.1235, 94899.1583], [112717.9488, 94911.7417], [112715.4896, 94910.5048], [112715.1232, 94911.1876], [112705.4717, 94928.7681], [112700.4757, 94926.1739], [112694.2363, 94937.6987], [112693.4548, 94939.1422], [112691.7897, 94942.2179], [112690.8475, 94943.9581], [112689.2997, 94946.817], [112688.523, 94948.2517], [112684.8645, 94955.0093], [112683.9981, 94956.6097], [112683.5926, 94957.3587], [112696.1487, 94964.1564], [112696.9023, 94962.7646], [112698.7181, 94963.7477], [112700.2074, 94964.5539], [112706.1279, 94967.7592], [112715.89, 94973.0443], [112721.6118, 94962.7883], [112718.9853, 94961.3229], [112719.6838, 94960.0709]]}], "defaultId": "SURVEY-194EF", "metadata": {"source": "07.09.26_Съемка деревьев _не 100 процентов(1).dwg", "coordinates": "Городская 1964 г. — обозначение из исходника", "height": "Балтийская 1977 г.", "units": "m", "geographicTransformValidated": false, "content": "Тест у точки Wi-Fi: два дерева, названия и описания выдуманы.", "radius_m": 3}, "georeference": {"projection": "+proj=tmerc +lat_0=0 +lon_0=30 +k=1 +x_0=95942.17 +y_0=-6552810.0 +ellps=krass +towgs84=23.57,-140.95,-79.8,0,0.35,0.79,-0.22 +units=m +no_defs", "status": "provisional", "controlVerified": false, "axes": "CAD x=easting, CAD y=northing", "source": "https://kerzhenskiy.ru/wp-content/uploads/2020/03/gis-metodichka_final.pdf", "sourcePages": [154, 162], "notes": "Published MSK-1964 parameters. Local control residuals unknown. Embedded DWG geographical tags rejected as inconsistent."}}</script>
+<script src="vendor/proj4.js"></script><script>class LocationController {
+ constructor({api,onFix,onState,now=()=>Date.now(),every=(fn,ms)=>setInterval(fn,ms),cancel=id=>clearInterval(id)}){Object.assign(this,{api,onFix,onState,now,every,cancel});this.wanted=false;this.active=false;this.watchId=null;this.epoch=0;this.timer=null;this.pending=false;this.lastFixAt=0;this.lastRefreshAt=0;this.errorCode=null;this.lastErrorAt=null}
+ emit(state,detail=''){this.state=state;this.onState({state,detail,watchId:this.watchId,wanted:this.wanted,errorCode:this.errorCode,lastErrorAt:this.lastErrorAt})}
+ receive(p,epoch){if(!this.active||epoch!==this.epoch)return;this.lastFixAt=this.now();this.errorCode=null;this.emit('fix');this.onFix(p)}
+ failure(e,epoch){
+  if(!this.active||epoch!==this.epoch)return;this.errorCode=e.code;this.lastErrorAt=this.now();
+  if(e.code===1){this.stop();this.errorCode=1;this.emit('denied','доступ запрещён браузером или системой. Если окна не было, проверьте геопозицию в настройках этого сайта Safari и разрешение для Safari в службах геолокации iPhone. Сайт не может сбросить запрет.');return}
+  this.emit(e.code===3?'timeout':'unavailable',e.code===3?'позиция пока не получена. Поиск продолжается автоматически.':'телефон не передал позицию. Поиск продолжается; проверьте службы геолокации.');
+ }
+ start(){
+  if(this.active)return;this.wanted=true;if(!this.api){this.wanted=false;this.emit('unsupported','API геолокации недоступен. Откройте HTTPS-ссылку в Safari/Chrome.');return}
+  const epoch=++this.epoch;this.active=true;this.pending=false;this.lastFixAt=0;this.lastRefreshAt=0;this.errorCode=null;this.emit('waiting','ожидаем разрешение и координаты телефона…');
+  try{this.watchId=this.api.watchPosition(p=>this.receive(p,epoch),e=>this.failure(e,epoch),{enableHighAccuracy:true,maximumAge:0,timeout:30000});}catch(e){this.failure({code:e.name==='SecurityError'||e.name==='NotAllowedError'?1:2},epoch);if(this.active){this.clear();this.wanted=false;this.emit('unsupported','не удалось запустить геолокацию. Откройте сайт непосредственно в Safari/Chrome и проверьте разрешения.')}return}
+  if(!this.active){if(this.watchId!==null)this.api.clearWatch(this.watchId);this.watchId=null;return}
+  this.emit('watching');this.request(false);if(!this.active)return;
+  this.timer=this.every(()=>{if(this.active&&!this.pending&&this.now()-this.lastFixAt>=8000&&this.now()-this.lastRefreshAt>=8000)this.request(true)},1000);
+ }
+ request(highAccuracy){
+  if(!this.active||this.pending||!this.api.getCurrentPosition)return;const epoch=this.epoch;this.pending=true;this.lastRefreshAt=this.now();
+  try{this.api.getCurrentPosition(p=>{if(epoch!==this.epoch)return;this.pending=false;this.receive(p,epoch)},e=>{if(epoch!==this.epoch)return;this.pending=false;this.failure(e,epoch)},{enableHighAccuracy:highAccuracy,maximumAge:0,timeout:highAccuracy?20000:12000});}catch(e){this.pending=false;this.failure({code:e.name==='SecurityError'||e.name==='NotAllowedError'?1:2},epoch)}
+ }
+ clear(){this.epoch++;this.active=false;this.pending=false;if(this.watchId!==null)this.api.clearWatch(this.watchId);this.watchId=null;if(this.timer!==null)this.cancel(this.timer);this.timer=null}
+ stop(){this.wanted=false;this.clear();this.emit('stopped','поиск остановлен пользователем.')}
+ pause(){const wanted=this.wanted;this.clear();this.wanted=wanted;this.emit('paused','страница закрыта; поиск возобновится после возвращения.')}
+ resume(){if(this.wanted&&!this.active)this.start()}
+}
+
+class CameraController {
+ constructor({video,getMedia,isHidden,onState}){Object.assign(this,{video,getMedia,isHidden,onState});this.generation=0;this.stream=null;this.pending=false;this.ready=false}
+ emit(state,detail=''){this.onState({state,detail,stream:this.stream,pending:this.pending,ready:this.ready})}
+ stop(detail='выключена.',state='off'){
+  this.generation++;this.pending=false;this.ready=false;const old=this.stream;this.stream=null;
+  if(old)old.getTracks().forEach(t=>t.stop());this.video.srcObject=null;this.video.hidden=true;this.emit(state,detail);
+ }
+ async start(){
+  if(this.pending||this.ready)return;
+  const ticket=++this.generation;this.pending=true;this.emit('waiting','ожидаем разрешение на заднюю камеру…');
+  let acquired=null;
+  try{
+   try{
+   acquired=await this.getMedia({audio:false,video:{facingMode:{exact:'environment'},width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30,max:30}}});
+   }catch(error){
+    if(error.name!=='OverconstrainedError'||ticket!==this.generation||this.isHidden())throw error;
+    acquired=await this.getMedia({audio:false,video:{facingMode:{ideal:'environment'}}});
+   }
+   if(ticket!==this.generation||this.isHidden()){acquired.getTracks().forEach(t=>t.stop());if(ticket===this.generation)this.stop('остановлена, пока страница скрыта.');return}
+   const track=acquired.getVideoTracks()[0];if(!track||track.getSettings?.().facingMode==='user')throw Object.assign(new Error(),{name:'RearCameraRequired'});
+   this.stream=acquired;this.video.srcObject=acquired;this.video.muted=true;this.video.playsInline=true;this.video.hidden=false;
+   track.addEventListener('ended',()=>{if(this.stream===acquired)this.stop('поток прерван. Нажмите «Возобновить».','interrupted')});
+   track.addEventListener('mute',()=>{if(this.stream===acquired){this.ready=false;this.emit('interrupted','изображение приостановлено браузером. Нажмите «Возобновить».')}});
+   track.addEventListener('unmute',()=>{if(this.stream===acquired&&ticket===this.generation&&!this.isHidden()&&!this.video.paused){this.ready=true;this.emit('ready','изображение восстановлено.')}});
+   await this.video.play();
+   if(ticket!==this.generation||this.isHidden()){acquired.getTracks().forEach(t=>t.stop());return}
+   this.pending=false;this.ready=track.readyState!=='ended'&&!track.muted;
+   this.emit(this.ready?'ready':'interrupted',this.ready?'задняя камера включена.':'ожидаем изображение камеры.');
+  }catch(error){
+   if(acquired&&this.stream!==acquired)acquired.getTracks().forEach(t=>t.stop());
+   if(ticket!==this.generation)return;
+   const messages={NotAllowedError:'доступ запрещён. Разрешите камеру для сайта в настройках Safari/Chrome и повторите.',NotFoundError:'задняя камера не найдена.',OverconstrainedError:'браузер не предоставил заднюю камеру. Откройте сайт непосредственно в Safari или Chrome.',NotReadableError:'камера занята или недоступна. Закройте другое приложение с камерой и повторите.',RearCameraRequired:'выбрана передняя камера. Для наведения нужна задняя.'};
+   this.stop(messages[error.name]||'не удалось запустить ('+(error.name||'ошибка')+'). Нажмите «Возобновить».','error');
+  }finally{if(ticket===this.generation){this.pending=false}}
+ }
+}
+class CandidateGate {
+ constructor(){this.id=null;this.since=0}
+ update(id,now){if(id!==this.id){this.id=id;this.since=now}return id!==null&&now-this.since>=450}
+}
+
+const Geometry = {
+  distance(a,b){return Math.hypot(a.x-b.x,a.y-b.y)},
+  bearing(a,b){return (Math.atan2(b.x-a.x,b.y-a.y)*180/Math.PI+360)%360},
+  angleDelta(a,b){return ((a-b+540)%360)-180},
+  evaluate(tree,visitor,heading,accuracy=0){
+    const distance=this.distance(tree,visitor);
+    const angle=distance<.001 ? 0 : this.angleDelta(this.bearing(visitor,tree),heading);
+    const inside=distance<=tree.radius+1e-9;
+    const positionCertain=distance+Math.max(0,accuracy)<=tree.radius+1e-9;
+    const aimed=distance>=.001 && Math.abs(angle)<=12;
+    return {distance,angle,inside,positionCertain,aimed,eligible:positionCertain&&aimed};
+  },
+  candidates(trees,visitor,heading,accuracy=0){return trees.map(tree=>({tree,...this.evaluate(tree,visitor,heading,accuracy)})).filter(t=>t.eligible).sort((a,b)=>Math.abs(a.angle)-Math.abs(b.angle))}
+};
+
+const LiveGeo={
+ norm(a){return (a%360+360)%360},
+ orientation(e){
+  const hasWebkit=Number.isFinite(e.webkitCompassHeading);
+  if(hasWebkit){
+   const accuracy=Number.isFinite(e.webkitCompassAccuracy)?e.webkitCompassAccuracy:null;
+   const valid=e.webkitCompassHeading>=0&&e.webkitCompassHeading<360&&(accuracy===null||accuracy>=0);
+   return {kind:'webkit-compass',absolute:valid,reference:'magnetic',accuracy,
+    bearing:valid?this.cameraBearing(this.norm(360-e.webkitCompassHeading),e.beta,e.gamma):null};
+  }
+  const absolute=e.absolute===true||e.type==='deviceorientationabsolute';
+  return {kind:absolute?'absolute':'relative',absolute,reference:absolute?'earth':'relative',accuracy:null,bearing:this.cameraBearing(e.alpha,e.beta,e.gamma)};
+ },
+ cameraBearing(alpha,beta,gamma){
+  if(![alpha,beta,gamma].every(Number.isFinite))return null;
+  const a=alpha*Math.PI/180,b=beta*Math.PI/180,g=gamma*Math.PI/180;
+  const east=-Math.cos(a)*Math.sin(g)-Math.sin(a)*Math.sin(b)*Math.cos(g);
+  const north=-Math.sin(a)*Math.sin(g)+Math.cos(a)*Math.sin(b)*Math.cos(g);
+  if(Math.hypot(east,north)<.35)return null;
+  return this.norm(Math.atan2(east,north)*180/Math.PI);
+ },
+ fresh(fix,now=Date.now()){return !!fix&&Number.isFinite(fix.time)&&now-fix.time<=10000&&now-fix.time>=-2000},
+ accept(next,last,pending,now=Date.now()){
+  if(![next.x,next.y,next.accuracy,next.time].every(Number.isFinite)||next.accuracy<0||!this.fresh(next,now))return {ok:false,reason:'stale'};
+  if(last&&next.time<=last.time)return {ok:false,reason:'old'};
+  if(last){const dt=(next.time-last.time)/1000,limit=Math.max(30,dt*6+last.accuracy+next.accuracy);
+   if(Math.hypot(next.x-last.x,next.y-last.y)>limit){
+    if(!pending||next.time<=pending.time||next.time-pending.time>10000||Math.hypot(next.x-pending.x,next.y-pending.y)>Math.max(15,next.accuracy+pending.accuracy))return {ok:false,reason:'jump',pending:next};
+   }
+  }
+  return {ok:true};
+ },
+ // This gate uses reported uncertainty conservatively; it is not image recognition
+ // and does not turn a probabilistic GPS accuracy estimate into a guarantee.
+ // TEST BUILD (Wi-Fi/GPS check): label when the nearest tree is within its radius (3 m) and inside the camera view.
+ // GPS accuracy, survey verification and heading accuracy are NOT used as gates here.
+ labelDecision(trees,fix,heading,headingAccuracy,controlVerified){
+  if(!fix||![fix.x,fix.y].every(Number.isFinite))return {reason:'position'};
+  const row=this.nearby(trees,fix)[0];
+  if(!row||row.distance>row.tree.radius)return {reason:'outside'};
+  if(!Number.isFinite(heading)||row.distance<0.7)return {reason:'eligible',tree:row.tree,delta:0};
+  const bearing=this.norm(Math.atan2(row.tree.x-fix.x,row.tree.y-fix.y)*180/Math.PI);
+  const delta=((bearing-heading+540)%360)-180;
+  if(Math.abs(delta)>30)return {reason:'aim',delta};
+  return {reason:'eligible',tree:row.tree,delta};
+ },
+ nearby(trees,fix){return trees.map(tree=>({tree,distance:Math.hypot(tree.x-fix.x,tree.y-fix.y)})).sort((a,b)=>a.distance-b.distance)},
+ possible(trees,fix){if(fix.accuracy>50)return [];return this.nearby(trees,fix).filter(t=>t.distance<=t.tree.radius+fix.accuracy+10)}
+};
+
+// Short robust window plus a time-based low-pass filter. This reduces jitter;
+// it does not certify absolute position or shrink the phone's uncertainty.
+class PositionFilter {
+ constructor(){this.reset()}
+ reset(){this.samples=[];this.value=null}
+ add(fix){
+  if(!this.value||fix.time-this.value.time>10000)this.reset();
+  this.samples=this.samples.filter(s=>fix.time-s.time<=4000);
+  this.samples.push({...fix});this.samples=this.samples.slice(-5);
+  const median=key=>{const rows=this.samples.slice().sort((a,b)=>a[key]-b[key]);const weight=s=>1/Math.max(3,s.accuracy)**2;const half=rows.reduce((sum,s)=>sum+weight(s),0)/2;let sum=0;for(const s of rows){sum+=weight(s);if(sum>=half)return s[key]}return rows.at(-1)[key]};
+  const target={x:median('x'),y:median('y')};
+  const alpha=this.value?Math.max(.12,Math.min(.85,1-Math.exp(-(fix.time-this.value.time)/1800))):1;
+  const x=this.value?this.value.x+alpha*(target.x-this.value.x):target.x;
+  const y=this.value?this.value.y+alpha*(target.y-this.value.y):target.y;
+  const offset=Math.hypot(fix.x-x,fix.y-y);
+  this.value={...fix,x,y,reportedAccuracy:fix.accuracy,accuracy:Math.max(...this.samples.map(s=>s.accuracy))+offset,filterOffset:offset,sampleCount:this.samples.length};
+  return this.value;
+ }
+}
+</script>
+<script>
+const DATA=JSON.parse(document.getElementById('catalogData').textContent);
+const $=id=>document.getElementById(id);
+const storeKey='garden-visitor-demo-144-v1';
+let saved=new Set();try{saved=new Set(JSON.parse(localStorage.getItem(storeKey)||'[]').filter(id=>DATA.trees.some(t=>t.id===id)))}catch{}
+let selected=DATA.trees.find(t=>t.id===DATA.defaultId)||DATA.trees[0];
+let visitor={x:selected.x,y:selected.y-2.4},heading=32,accuracy=0,tab='camera',onlySaved=false,currentCard=null,stream=null,watchId=null,gpsFix=null,gpsTicker=null,cameraPending=false,cameraReady=false;
+let mapBounds=null,toastTimer=null,focusBeforeModal=null;
+const fmt=(n,d=1)=>n.toLocaleString('ru-RU',{minimumFractionDigits:d,maximumFractionDigits:d});
+const svgNS='http://www.w3.org/2000/svg';
+function el(tag,attrs={}){const e=document.createElementNS(svgNS,tag);for(const [k,v] of Object.entries(attrs))e.setAttribute(k,v);return e}
+function icon(id){return `<svg class="icon" aria-hidden="true"><use href="#${id}"/></svg>`}
+function toast(message){$('toast').textContent=message;$('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,4000)}
+function showTab(next){tab=next;for(const t of ['camera','map','catalog'])$(t+'Page').hidden=t!==next;document.querySelectorAll('[data-tab]').forEach(b=>{b.classList.toggle('active',b.dataset.tab===next);if(b.dataset.tab===next)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});if(next==='catalog')renderCatalog();if(next==='map')renderMap();window.scrollTo({top:0,behavior:'instant'})}
+function selectTree(tree,{reset=true}={}){selected=tree;if(reset&&mode!=='live'){visitor={x:tree.x,y:tree.y-2.4};heading=32;accuracy=0;$('accuracySlider').value=0}renderState()}
+function reset(){selectTree(selected);toast('Тест начат заново: подойдите и наведите камеру.')}
+function changeDistance(d){const a=Geometry.bearing(visitor,selected)*Math.PI/180;visitor={x:selected.x-Math.sin(a)*d,y:selected.y-Math.cos(a)*d};renderState()}
+function activeCandidates(){return Geometry.candidates(DATA.trees,visitor,heading,accuracy)}
+function renderDemoState(){
+ $('selectedTreePanel').hidden=false;$('manualTreeCard').hidden=true;$('backCamera').textContent='Проверить в камере →';
+ const r=Geometry.evaluate(selected,visitor,heading,accuracy), candidates=activeCandidates(),target=candidates.length===1?candidates[0]:null;
+ $('selectedName').textContent=selected.name;$('selectedNumber').textContent=selected.demoNumber;
+ $('distanceValue').textContent=fmt(r.distance);$('distanceOutput').textContent=fmt(r.distance)+' м';$('distanceSlider').value=Math.min(4,Math.max(.1,r.distance));
+ $('angleOutput').textContent=fmt(r.angle===0?0:-r.angle,0)+'°';$('angleValue').textContent=fmt(Math.abs(r.angle),0)+'°';$('angleSlider').value=Math.max(-70,Math.min(70,-r.angle));$('directionArrow').style.transform=`rotate(${-r.angle}deg)`;
+ $('accuracyOutput').textContent=fmt(accuracy)+' м';
+ $('demoScene').style.transform=`translateX(${Math.max(-22,Math.min(22,r.angle*.5))}%) scale(${1+Math.max(0,3-r.distance)*.08})`;
+ let message='',caption='',kind='';
+ if(!r.inside){message=`Подойдите ближе: до дерева ${fmt(r.distance)} м, зона — 3 м.`;caption='до выбранного дерева · нужно подойти'}
+ else if(!r.positionCertain){message=`Погрешность ±${fmt(accuracy)} м: нахождение внутри метровой зоны не подтверждено.`;caption='позиция недостаточно точная';kind='warn'}
+ else if(r.distance<.001){message='Тестовый посетитель находится в центре ствола. Сместитесь немного в сторону.';caption='направление до ствола не определено';kind='warn'}
+ else if(!r.aimed){message='Вы в метровой зоне. Направьте прицел на ствол.';caption='вы в зоне · осталось навести камеру'}
+ else if(candidates.length>1){message='Несколько экземпляров в зоне и прицеле. Уточните выбор ниже.';caption='нужен выбор экземпляра';kind='warn'}
+ else{message='Дерево в зоне и в прицеле. Коснитесь зелёной подписи.';caption='всё готово · можно открыть карточку';kind='good'}
+ if(target&&target.tree.id!==selected.id){message='В прицеле другое дерево. Его название показано на зелёной подписи.';kind='warn'}
+ $('statusText').textContent=message;$('statusLine').className='status-line '+kind;$('viewCaption').textContent=caption;
+ $('crosshair').classList.toggle('ready',!!target);$('targetLabel').hidden=!target;$('openButton').disabled=!target;
+ if(target){$('targetName').textContent=target.tree.name;$('targetLabel').style.left=(50+target.angle*.7)+'%'}
+ $('ambiguity').hidden=candidates.length<2;$('candidateList').replaceChildren();
+ if(candidates.length>1)for(const c of candidates){const b=document.createElement('button');b.textContent=c.tree.demoNumber+' · '+c.tree.name+' · '+fmt(c.distance)+' м';b.onclick=()=>openCard(c.tree,'camera',true);$('candidateList').append(b)}
+ $('mapSelectedName').textContent=selected.name;$('mapDistance').textContent='До тестового посетителя: '+fmt(r.distance)+' м';
+ document.querySelectorAll('.saved-count').forEach(e=>e.textContent=saved.size);
+ if(tab==='map')renderMap();
+}
+function openCameraCard(){const c=activeCandidates();if(c.length!==1){toast('Сначала подойдите к дереву и наведите камеру.');renderState();return}openCard(c[0].tree,'camera')}
+function openCard(tree,source='catalog',manual=false){
+ if(source==='camera'){const c=activeCandidates();if(!c.some(x=>x.tree.id===tree.id)||(!manual&&c.length!==1)){renderState();return}}
+ currentCard=tree;$('dialogNumber').textContent=source==='candidate'?'КАНДИДАТ · ВЫБОР НЕ ПОДТВЕРЖДЁН':source==='camera'?'ОТКРЫТО ЧЕРЕЗ ПРИЦЕЛ':'ПРОСМОТР КАТАЛОГА';$('dialogName').textContent=tree.name;$('dialogDescription').textContent=tree.description;$('dialogCode').textContent=tree.demoNumber;
+ saved.add(tree.id);try{localStorage.setItem(storeKey,JSON.stringify([...saved]))}catch{}document.querySelectorAll('.saved-count').forEach(e=>e.textContent=saved.size);focusBeforeModal=document.activeElement;$('treeDialog').showModal();
+}
+function closeTree(){$('treeDialog').close();if(tab==='catalog')renderCatalog()}
+$('treeDialog').addEventListener('close',()=>{if(focusBeforeModal?.isConnected)focusBeforeModal.focus()});
+function renderCatalog(){
+ const q=$('searchInput').value.trim().toLocaleLowerCase('ru');const items=DATA.trees.filter(t=>(!onlySaved||saved.has(t.id))&&(`${t.name} ${t.demoNumber}`).toLocaleLowerCase('ru').includes(q));
+ $('catalogGrid').replaceChildren();$('catalogEmpty').hidden=items.length>0;
+ for(const t of items){const b=document.createElement('button');b.className='catalog-item';b.setAttribute('aria-label','Открыть '+t.name);b.innerHTML=`<div class="tree-meta"><span>${t.demoNumber}</span><span class="demo-tag">Демо</span></div><div class="tree-avatar"><svg aria-hidden="true"><use href="#tree-illustration"/></svg></div><h2 class="tree-name"></h2><small>${saved.has(t.id)?'Карточка уже открыта':'Радиус 3 м · посмотреть историю'} →</small>`;b.querySelector('h2').textContent=t.name;b.onclick=()=>openCard(t);$('catalogGrid').append(b)}
+}
+function fitMap(){const xs=DATA.trees.map(t=>t.x),ys=DATA.trees.map(t=>-t.y);const minX=Math.min(...xs)-8,maxX=Math.max(...xs)+8,minY=Math.min(...ys)-8,maxY=Math.max(...ys)+8;mapBounds={x:minX,y:minY,w:maxX-minX,h:maxY-minY};renderMap()}
+function zoomTree(){mapBounds={x:selected.x-14,y:-selected.y-16,w:28,h:32};renderMap()}
+function zoomMap(factor){if(!mapBounds)return;const nw=Math.max(8,Math.min(600,mapBounds.w*factor)),nh=mapBounds.h*nw/mapBounds.w;mapBounds={x:mapBounds.x+(mapBounds.w-nw)/2,y:mapBounds.y+(mapBounds.h-nh)/2,w:nw,h:nh};renderMap()}
+function renderMap(){
+ if(!mapBounds)return;const svg=$('gardenMap');svg.replaceChildren();svg.setAttribute('viewBox',`${mapBounds.x} ${mapBounds.y} ${mapBounds.w} ${mapBounds.h}`);
+ for(const c of DATA.context){const p=el('polyline',{points:c.points.map(p=>`${p[0]},${-p[1]}`).join(' '),fill:'none',stroke:c.layer.includes('Здания')?'#b3b9af':'#bec8b3','stroke-width':c.layer.includes('Здания')?.35:.18,'pointer-events':'none'});svg.append(p)}
+ for(const t of DATA.trees){const g=el('g',{'class':'map-tree'+((mode==='demo'?t.id===selected.id:mapPickedTree?.id===t.id)?' selected':''),'tabindex':'0','role':'button','aria-label':t.demoNumber+' '+t.name});const title=el('title');title.textContent=t.name;g.append(title,el('circle',{cx:t.x,cy:-t.y,r:t.radius,'class':'tree-zone'}),el('circle',{cx:t.x,cy:-t.y,r:Math.max(.2,Math.min(.42,mapBounds.w/450)),'class':'map-dot'}));const activate=()=>{if(mapAction){chooseMapPoint(t);return}if(mode==='live')pickMapTree(t);else {selectTree(t,{reset:false});toast('Выбрано: '+t.name)}};g.addEventListener('click',ev=>{ev.stopPropagation();activate()});g.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();activate()}});svg.append(g)}
+ if(mode==='live'&&!freshPosition())return;
+ const vr=Math.max(.23,Math.min(.7,mapBounds.w/230));const a=heading*Math.PI/180;
+ if(mode==='demo'||cameraHeading()!==null)svg.append(el('line',{x1:visitor.x,y1:-visitor.y,x2:visitor.x+Math.sin(a)*Math.max(2,mapBounds.w/25),y2:-visitor.y-Math.cos(a)*Math.max(2,mapBounds.w/25),stroke:'#c37935','stroke-width':vr*.45,'pointer-events':'none'}));
+ svg.append(el('circle',{cx:visitor.x,cy:-visitor.y,r:vr,fill:'#c37935',stroke:'#fffef9','stroke-width':vr*.35,'pointer-events':'none'}));
+ if(accuracy>0)svg.append(el('circle',{cx:visitor.x,cy:-visitor.y,r:accuracy,fill:'#c3793515',stroke:'#c37935','stroke-width':.1,'stroke-dasharray':'.4 .4','pointer-events':'none'}));
+}
+$('gardenMap').addEventListener('click',ev=>{const p=$('gardenMap').createSVGPoint();p.x=ev.clientX;p.y=ev.clientY;const ctm=$('gardenMap').getScreenCTM();if(!ctm)return;const pos=p.matrixTransform(ctm.inverse());chooseMapPoint({x:pos.x,y:-pos.y})});
+function cameraMessage(message){$('cameraStatus').textContent='Камера: '+message;if(typeof renderCameraSurface==='function')renderCameraSurface()}
+function gpsMessage(message){$('gpsStatusLine').textContent='Геолокация: '+message}
+async function toggleCamera(){
+ if(cameraEngine.stream||cameraEngine.pending){cameraEngine.stop();return}
+ if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia){cameraMessage('нужна HTTPS-ссылка в Safari или Chrome.');return}
+ await cameraEngine.start();
+ if(cameraReady&&!locationEngine.active)locationEngine.start();
+}
+function sensorMessage(t){$('sensorStatus').textContent=t;document.querySelector('.diag').open=true}
+function stopGPS(){locationEngine.stop()}
+function gpsStatus(){if(!gpsFix)return;const c=gpsFix.coords,age=Math.max(0,(Date.now()-gpsFix.timestamp)/1000);const message=`${c.latitude.toFixed(6)}, ${c.longitude.toFixed(6)} · погрешность ±${fmt(c.accuracy)} м · давность ${fmt(age,0)} с`;gpsMessage(message);$('sensorStatus').textContent=message}
+function toggleGPS(){if(locationEngine.wanted)locationEngine.stop();else locationEngine.start()}
+$('startSensors').onclick=()=>{if(!stream&&!cameraPending)void toggleCamera();if(watchId===null)toggleGPS()};
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+$('approachButton').onclick=()=>changeDistance(.7);$('aimButton').onclick=()=>{heading=Geometry.bearing(visitor,selected);renderState()};$('openButton').onclick=openCameraCard;$('targetLabel').onclick=openCameraCard;$('resetButton').onclick=reset;
+$('distanceSlider').oninput=e=>changeDistance(Number(e.target.value));$('angleSlider').oninput=e=>{heading=(Geometry.bearing(visitor,selected)+Number(e.target.value)+360)%360;renderState()};$('accuracySlider').oninput=e=>{accuracy=Number(e.target.value);renderState()};
+$('showMapButton').onclick=()=>{showTab('map');zoomTree()};$('backCamera').onclick=()=>showTab('camera');$('zoomIn').onclick=()=>zoomMap(.65);$('zoomOut').onclick=()=>zoomMap(1.55);$('fitMap').onclick=fitMap;
+$('searchInput').oninput=renderCatalog;$('savedFilter').onclick=()=>{onlySaved=!onlySaved;$('savedFilter').setAttribute('aria-pressed',onlySaved);$('savedFilter').style.background=onlySaved?'#e0ebca':'';renderCatalog()};
+$('closeTree').onclick=closeTree;$('dialogMap').onclick=()=>{const t=currentCard;closeTree();selectTree(t,{reset:false});showTab('map');zoomTree()};$('dialogCamera').onclick=()=>{const t=currentCard;closeTree();selectTree(t);showTab('camera')};
+$('helpButton').onclick=()=>$('helpDialog').showModal();$('closeHelp').onclick=()=>$('helpDialog').close();$('startDemo').onclick=()=>{$('helpDialog').close();setMode('demo');showTab('camera');reset()};
+for(const d of [$('treeDialog'),$('helpDialog')])d.addEventListener('click',e=>{if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close()}});
+$('cameraButton').onclick=toggleCamera;$('cameraDiagButton').onclick=toggleCamera;$('gpsButton').onclick=toggleGPS;
+
+</script><script>const MAG_DECLINATION=11; // magnetic declination, St Petersburg, deg east (approx.)
+let lastOrientationRender=0,nearbySignature='',bearingTarget=null,cameraCandidateSignature='',cameraCandidateIds=[];
+const positionFilter=new PositionFilter();let rawLiveFix=null;
+const candidateGate=new CandidateGate();
+let mode='live',liveFix=null,pendingFix=null,orientationSample=null,headingOffset=null,positionOffset=null,mapAction=null,liveLabel=null;
+let mapPickedTree=null,confirmedTree=null,confirmedAt=0,confirmedOrigin=null;
+const projection=DATA.georeference.projection;
+const gpsToPlan=(lon,lat)=>{const p=proj4('EPSG:4326',projection,[lon,lat]);return {x:p[0],y:p[1]}};
+function freshPosition(){return LiveGeo.fresh(liveFix)}
+function correctedPosition(){
+ if(!liveFix)return null;
+ if(positionOffset&&(Date.now()-positionOffset.time>120000||Geometry.distance(liveFix,positionOffset.origin)>20)){positionOffset=null;headingOffset=null;toast('Ручная поправка истекла. Снова используется исходный GPS.')}
+ return {x:liveFix.x+(positionOffset?.x||0),y:liveFix.y+(positionOffset?.y||0)};
+}
+function cameraHeading(){
+ if(!orientationSample||Date.now()-orientationSample.time>2500||orientationSample.bearing===null)return null;
+ if(headingOffset&&Date.now()-headingOffset.time<=120000&&headingOffset.kind===orientationSample.kind)return LiveGeo.norm(orientationSample.bearing+headingOffset.value);
+ headingOffset=null;
+ if(orientationSample.absolute&&liveFix){const n=gpsToPlan(liveFix.lon,liveFix.lat+.0001);return LiveGeo.norm(orientationSample.bearing+MAG_DECLINATION+Geometry.bearing(gpsToPlan(liveFix.lon,liveFix.lat),n))}
+ return null;
+}
+function ingestPosition(p){
+ const c=p.coords;
+ if(![c.longitude,c.latitude,c.accuracy,p.timestamp].every(Number.isFinite)||Math.abs(c.latitude)>90||Math.abs(c.longitude)>180){gpsMessage('получено некорректное измерение.');return}
+ let point;try{point=gpsToPlan(c.longitude,c.latitude)}catch{gpsMessage('не удалось пересчитать координаты.');return}
+ const next={...point,accuracy:c.accuracy,time:p.timestamp,lat:c.latitude,lon:c.longitude};
+ const check=LiveGeo.accept(next,rawLiveFix,pendingFix);
+ if(!check.ok){if(check.pending)pendingFix=check.pending;gpsMessage(check.reason==='jump'?'скачок позиции; ждём подтверждения следующим измерением.':'устаревшее измерение пропущено.');return}
+ rawLiveFix=next;liveFix=positionFilter.add(next);pendingFix=null;gpsFix=p;gpsStatus();if(!gpsTicker)gpsTicker=setInterval(()=>{gpsStatus();if(mode==='live')renderState()},1000);if(mode==='live')renderState();
+}
+function onOrientation(e){
+ const sample=LiveGeo.orientation(e);
+ if(sample.bearing===null&&!Number.isFinite(e.beta)&&!Number.isFinite(e.gamma))return;
+ clearTimeout(orientationWaitTimer);
+ if(!sample.absolute&&sample.kind==='relative'&&orientationSample?.absolute&&Date.now()-orientationSample.time<2500)return;
+ orientationSample={...sample,time:Date.now()};
+ if(mode==='live'&&Date.now()-lastOrientationRender>100){lastOrientationRender=Date.now();renderState()}
+}
+let orientationPermission='not-requested',orientationError=null,orientationWaitTimer=null,orientationWaiting=false;
+function sensorPolicy(name){
+ try{const policy=document.permissionsPolicy||document.featurePolicy;
+  if(!policy||typeof policy.allowsFeature!=='function')return null;
+  if(typeof policy.features==='function'&&!policy.features().includes(name))return null;
+  return policy.allowsFeature(name);
+ }catch{return null}
+}
+function orientationMessage(message){$('orientationStatus').textContent='Компас: '+message;renderState()}
+function orientationAllowed(){return orientationPermission==='granted'||orientationPermission==='not-required'}
+function resumeOrientation(){
+ if(document.hidden||!orientationAllowed())return;
+ window.removeEventListener('deviceorientation',onOrientation);window.removeEventListener('deviceorientationabsolute',onOrientation);
+ window.addEventListener('deviceorientation',onOrientation);window.addEventListener('deviceorientationabsolute',onOrientation);
+ if(!orientationSample)orientationMessage('доступ разрешён, ожидаем новые показания. Повторное разрешение не требуется.');
+}
+async function startOrientation(force=false){
+ if(orientationWaiting)return;
+ if(orientationAllowed()&&!force){resumeOrientation();return;}
+ const requestEpoch=++orientationRequestEpoch;
+ clearTimeout(orientationWaitTimer);orientationSample=null;headingOffset=null;orientationError=null;
+ window.removeEventListener('deviceorientation',onOrientation);window.removeEventListener('deviceorientationabsolute',onOrientation);
+ if(!window.isSecureContext){orientationPermission='insecure';orientationMessage('нужна HTTPS-страница.');return}
+ if(typeof DeviceOrientationEvent==='undefined'){orientationPermission='unsupported';orientationMessage('недоступен в этом браузере.');return}
+ if(['accelerometer','gyroscope','magnetometer'].some(name=>sensorPolicy(name)===false)){orientationPermission='policy-blocked';orientationMessage('датчики заблокированы политикой страницы. Откройте прямую ссылку в отдельной вкладке Safari.');return}
+ orientationWaiting=true;orientationPermission='requesting';orientationMessage('запрашиваем доступ…');
+ try{
+  // Keep this synchronous up to requestPermission: no await before this call.
+  const permission=typeof DeviceOrientationEvent.requestPermission==='function'?await DeviceOrientationEvent.requestPermission(true):'not-required';
+  orientationPermission=permission;
+  if(document.hidden||requestEpoch!==orientationRequestEpoch)return;
+  if(permission!=='granted'&&permission!=='not-required'){orientationMessage('доступ не разрешён. Если окно не появилось, проверьте сохранённые разрешения Safari. Сайт не может сбросить запрет.');return}
+  window.addEventListener('deviceorientation',onOrientation);window.addEventListener('deviceorientationabsolute',onOrientation);
+  orientationMessage('ожидаем показания датчика. Держите телефон вертикально.');
+  orientationWaitTimer=setTimeout(()=>{
+   if(requestEpoch!==orientationRequestEpoch||orientationSample)return;
+   orientationMessage('доступ разрешён, но показания не поступают; это не подтверждённый запрет. Поднимите телефон и немного поверните его.');
+  },8000);
+ }catch(error){
+  if(requestEpoch!==orientationRequestEpoch)return;
+  orientationError=error.name||'Error';orientationPermission='error';
+  orientationMessage(orientationError==='NotAllowedError'?'запрос отклонён Safari. Нажмите отдельную кнопку «Включить компас». Если запрет повторится, проверьте разрешения Safari.':'ошибка запроса ('+orientationError+'). Нажмите «Включить компас» снова.');
+ }finally{if(requestEpoch===orientationRequestEpoch)orientationWaiting=false;renderState()}
+}
+function setMode(next){
+ if(mode!==next)clearTreeChoice(false);
+ mode=next;mapAction=null;liveLabel=null;bearingTarget=null;candidateGate.update(null,Date.now());
+ $('liveMode').setAttribute('aria-pressed',next==='live');$('demoMode').setAttribute('aria-pressed',next==='demo');
+ for(const id of ['approachButton','aimButton','resetButton','distanceSlider','angleSlider','accuracySlider'])$(id).disabled=next==='live';
+ $('mapActionHint').textContent=next==='live'?'Нажмите на дерево для выбора. Оранжевая точка — GPS телефона.':'Нажмите на свободное место для перемещения тестового посетителя.';
+ $('demoControls').hidden=next==='live';$('liveCandidates').hidden=true;
+ $('positionCorrection').disabled=next!=='live';$('directionCorrection').disabled=next!=='live';
+ if(next==='demo'){selectTree(selected);$('targetLabel').style.background='';$('sceneMode').textContent=stream?'КАМЕРА · СИМУЛЯЦИЯ ПОЗИЦИИ':'СИМУЛЯЦИЯ';}
+ renderState();
+}
+function renderCameraSurface(){
+ $('demoScene').hidden=true;
+ $('cameraEmpty').hidden=mode==='demo'||cameraReady;
+ $('cameraEmptyMessage').textContent=$('cameraStatus').textContent||'Нажмите кнопку и разрешите доступ к камере.';
+ $('cameraEmptyStart').textContent=cameraPending?'Отменить запрос':stream?'Перезапустить камеру':'Включить камеру';
+ $('crosshair').hidden=mode==='live'&&!cameraReady;
+ $('cameraCandidates').hidden=mode!=='live'||!cameraReady;
+ $('viewer').classList.toggle('has-live-candidates',mode==='live'&&cameraReady);
+}
+function renderState(){renderCameraSurface();if(mode==='live')renderLiveState();else renderDemoState();if(typeof renderFieldHUD==='function')renderFieldHUD()}
+function renderLiveState(){
+ const fresh=freshPosition(),pos=correctedPosition(),h=cameraHeading();liveLabel=null;let cameraRows=[];
+ $('targetLabel').hidden=true;$('crosshair').classList.remove('ready');$('openButton').disabled=true;$('ambiguity').hidden=true;$('candidateList').replaceChildren();
+ $('demoScene').style.transform='';$('sceneMode').textContent=stream?'КАМЕРА · GPS':'GPS · КАМЕРА НЕ ВКЛЮЧЕНА';
+ $('selectedTreePanel').hidden=!confirmedTree;
+ $('selectedName').textContent=confirmedTree?.name||'Дерево не выбрано';$('selectedNumber').textContent=confirmedTree?.demoNumber||'—';
+ $('mapSelectedName').textContent=mapPickedTree?'Выбрано на плане: '+mapPickedTree.name:'Нажмите точку дерева, у которого стоите';
+ $('backCamera').textContent=mapPickedTree?'Я у этого дерева →':'Вернуться к камере';
+ $('directionArrow').hidden=h===null;$('angleValue').textContent=h===null?'—':fmt(h,0)+'°';
+ if(orientationSample){$('orientationStatus').textContent=Date.now()-orientationSample.time>2500?'Компас разрешён: ждём свежие показания. Поверните телефон.':orientationSample.accuracy!==null&&orientationSample.accuracy<0?'Компас: показания недостоверны.':orientationSample.bearing===null?'Направление: держите камеру примерно горизонтально, экран вертикально.':h===null?'Направление: север пока не определён. Автоматическая подпись скрыта.':orientationSample.kind==='webkit-compass'&&!headingOffset?'Компас iPhone: '+fmt(h,0)+'° · магнитный, приблизительно'+(orientationSample.accuracy===null?'':' · ±'+fmt(orientationSample.accuracy,0)+'°'):headingOffset?'Направление: поправка по ориентиру, действует до 2 минут.':'Направление: приблизительно по датчику; можно уточнить по ориентиру.'}
+ $('correctionStatus').textContent=positionOffset?'Применена временная ручная поправка позиции. Погрешность GPS не уменьшена.':'Привязка МСК-1964 → GPS предварительная: контрольные точки ещё не проверены.';
+ let msg=typeof window.gardenLocationState==='string'&&window.gardenLocationState==='denied'?'Геолокация запрещена в разрешениях телефона или браузера.':typeof window.gardenLocationState==='string'&&['timeout','unavailable','waiting','watching'].includes(window.gardenLocationState)?'Телефон пока не передал свежую позицию. Поиск продолжается — не нужно стоять прямо у конкретного дерева.':'Нажмите «Найти моё положение», чтобы получить GPS.';
+ $('distanceValue').textContent='—';$('viewCaption').textContent='ожидаем свежую позицию';$('mapDistance').textContent='GPS-позиция не получена';
+ if(liveFix&&!fresh){msg='Позиция устарела. Ждём новое измерение GPS.';$('mapDistance').textContent='Последняя GPS-позиция устарела';}
+ if(fresh&&pos){
+  visitor=pos;accuracy=liveFix.accuracy;if(h!==null)heading=h;
+  const rows=LiveGeo.nearby(DATA.trees,pos),nearest=rows[0],selectedDistance=Geometry.distance(selected,pos);
+  $('distanceValue').textContent=fmt(liveFix.reportedAccuracy??accuracy);$('viewCaption').textContent='погрешность GPS · ± м';
+  $('mapDistance').textContent=mapPickedTree?'До выбранной точки ≈ '+fmt(Geometry.distance(mapPickedTree,pos))+' м · GPS ±'+fmt(accuracy)+' м':'GPS ±'+fmt(accuracy)+' м. Круг показывает неопределённость позиции.';
+  msg=nearest.distance>500?'Вы далеко от точек съёмки. Подписи скрыты.':accuracy>50?'GPS слишком неточный. Подождите на открытом месте.':'GPS подключён. Наведите камеру на дерево; для подписи нужно направление компаса.';
+  const possible=LiveGeo.possible(DATA.trees,{...pos,accuracy});
+  const rowsToShow=possible.length?possible.slice(0,6):nearest.distance<500?rows.slice(0,3):[];
+  cameraRows=rowsToShow.slice(0,3);
+  $('nearbySummary').textContent=possible.length?`Возможных экземпляров: ${possible.length}. Это кандидаты, не уверенное определение.`:rowsToShow.length?'Ближайшие точки — ещё не подтверждение входа в радиус 3 м.':'Рядом нет доступных кандидатов.';
+  const signature=rowsToShow.map(r=>r.tree.id+':'+fmt(r.distance)).join('|');
+  if(signature!==nearbySignature){nearbySignature=signature;$('nearbyList').replaceChildren();
+  for(const r of rowsToShow){const b=document.createElement('button');b.className='text-button';b.style.cssText='display:block;width:100%;text-align:left;margin:7px 0;white-space:normal';b.textContent=r.tree.demoNumber+' · '+r.tree.name+' · ≈ '+fmt(r.distance)+' м';b.onclick=()=>{selectTree(r.tree,{reset:false});openCard(r.tree,'candidate')};$('nearbyList').append(b)}}
+  const decision=LiveGeo.labelDecision(DATA.trees,{...pos,accuracy},h,orientationSample?.accuracy,DATA.georeference.controlVerified);
+  const reasons={position:'Нет надёжной позиции для подписи.',outside:'Вы дальше 3 м от Берёзы и Ели. Подойдите ближе.',accuracy:'GPS не различает деревья в зоне 3 м. Выберите свой экземпляр на плане кнопкой под камерой.',reference:'Привязка съёмки ещё не проверена. Для проверки карточки выберите дерево на плане.',ambiguous:'Соседние деревья нельзя уверенно различить. Подпись скрыта.',heading:'Недостаточно точности направления для подписи дерева.',aim:'Дерево рядом, но вне кадра. Поверните камеру.'};
+  msg=reasons[decision.reason]||'Проверяем положение и направление.';
+  if(cameraReady&&!bearingTarget&&decision.tree){
+   if(candidateGate.update(decision.tree.id,Date.now())){liveLabel=decision.tree;$('targetName').textContent='По координатам: '+liveLabel.name;$('targetLabel').hidden=false;$('targetLabel').style.background='#e8c994';$('targetLabel').style.left=Math.max(12,Math.min(88,50+(decision.delta||0)*100/50))+'%';msg='Подпись рассчитана по координатам. Изображение камеры не распознаётся.';}
+  }else candidateGate.update(null,Date.now());
+ }else {candidateGate.update(null,Date.now());nearbySignature='';$('nearbyList').replaceChildren();$('nearbySummary').textContent='Список появится после получения свежего GPS.';}
+ renderTreeChoice();
+ renderCameraCandidates(cameraRows,fresh,h,msg);
+ $('statusText').textContent=msg;$('statusLine').className='status-line warn';if(tab==='map')renderMap();
+}
+function renderCameraCandidates(rows,fresh,h,message){
+ cameraCandidateIds=rows.map(r=>r.tree.id);
+ const signature=cameraCandidateIds.slice().sort().join('|');
+ if(signature!==cameraCandidateSignature){
+  cameraCandidateSignature=signature;$('cameraCandidateButtons').replaceChildren();
+  for(const row of rows.slice().sort((a,b)=>a.tree.demoNumber.localeCompare(b.tree.demoNumber))){
+   const tree=row.tree,b=document.createElement('button');b.textContent=tree.demoNumber+' · '+tree.name;
+   b.onclick=()=>{if(freshPosition()&&cameraCandidateIds.includes(tree.id))openCard(tree,'candidate');else toast('Позиция изменилась. Дождитесь обновления кандидатов.')};$('cameraCandidateButtons').append(b);
+  }
+ }
+ $('cameraCandidateButtons').hidden=true;
+ $('cameraCandidateTitle').textContent='GPS и компас';
+ $('cameraCandidateStatus').textContent=!fresh?message:`GPS ±${fmt(liveFix.reportedAccuracy??liveFix.accuracy)} м. ${message}`;
+ $('cameraGPSAction').hidden=fresh;
+ $('cameraHeadingAction').hidden=orientationAllowed();
+ $('retryOrientation').textContent=orientationAllowed()?'Обновить показания компаса':'Включить компас';
+ $('cameraCandidateStatus').textContent+=' '+(orientationAllowed()?(h===null?'Компас разрешён; ждём пригодное направление.':'Компас работает.'):'Компас ещё не разрешён.');
+}
+function chooseMapPoint(point){
+ if(mode==='demo'){visitor=point;renderState();return}
+ if(!mapAction){toast('В режиме GPS положение задаёт телефон. Для ручной поправки нажмите «Уточнить позицию».');return}
+ if(!freshPosition()){toast('Сначала дождитесь свежего GPS.');return}
+ if(mapAction==='position'){
+  if(Geometry.distance(point,liveFix)>100){toast('Смещение больше 100 м. Проверьте GPS и выбранную точку.');return}
+  positionOffset={x:point.x-liveFix.x,y:point.y-liveFix.y,time:Date.now(),origin:{...liveFix}};headingOffset=null;toast('Временная поправка принята на 2 минуты или до перемещения на 20 м.');
+ }else{
+  const pos=correctedPosition(),d=Geometry.distance(pos,point);
+  if(d<5){toast('Выберите ориентир дальше 5 м для устойчивого направления.');return}
+  bearingTarget={x:point.x,y:point.y};mapAction=null;showTab('camera');
+  $('bearingHint').textContent='Теперь наведите прицел на выбранный ориентир. Удерживая телефон неподвижно, нажмите «Зафиксировать направление».';
+  if(typeof setExpanded==='function')setExpanded(true);renderState();return;
+ }
+ mapAction=null;$('mapActionHint').textContent='Нажмите на дерево, чтобы выбрать его. Оранжевая точка — GPS телефона.';renderState();
+}
+$('liveMode').onclick=()=>setMode('live');$('demoMode').onclick=()=>setMode('demo');
+$('positionCorrection').onclick=()=>{if(!freshPosition()){toast('Дождитесь свежего GPS.');return}mapAction='position';showTab('map');$('mapActionHint').textContent='Стойте на известной точке. Нажмите на её место на плане. Это ручная поправка, а не измерение точности.'};
+$('directionCorrection').onclick=()=>{if(!freshPosition()){toast('Дождитесь свежего GPS.');return}void startOrientation();bearingTarget=null;mapAction='direction';showTab('map');$('mapActionHint').textContent='Шаг 1: выберите известный ориентир дальше 5 м. Затем откроется камера для наведения и фиксации.'};
+$('clearCorrection').onclick=()=>{positionOffset=null;headingOffset=null;mapAction=null;bearingTarget=null;renderState();toast('Ручные поправки сброшены.')};
+$('startSensors').onclick=()=>{setMode('live');void startOrientation();if(!stream&&!cameraPending)void toggleCamera();if(!locationEngine.active)locationEngine.start()};
+$('targetLabel').onclick=()=>{if(mode==='demo')openCameraCard();else if(liveLabel&&freshPosition()&&cameraHeading()!==null&&stream)openCard(liveLabel,'candidate')};
+document.addEventListener('visibilitychange',()=>{if(document.hidden){orientationSample=null;headingOffset=null;positionOffset=null}});
+window.addEventListener('pagehide',()=>{liveFix=null;rawLiveFix=null;positionFilter.reset();pendingFix=null;orientationSample=null;headingOffset=null;positionOffset=null;window.removeEventListener('deviceorientation',onOrientation);window.removeEventListener('deviceorientationabsolute',onOrientation)});
+setMode('live');
+
+window.addEventListener('pageshow',()=>{resumeOrientation();renderState()});
+
+function clearTreeChoice(render=true){mapPickedTree=null;confirmedTree=null;confirmedAt=0;confirmedOrigin=null;if(render)renderState()}
+function pickMapTree(tree){clearTreeChoice(false);mapPickedTree=tree;selectTree(tree,{reset:false});$('backCamera').scrollIntoView?.({block:'center',behavior:'smooth'});toast('Выбрано на плане. Если стоите у этого дерева, нажмите «Я у этого дерева».')}
+function confirmMapTree(){
+ if(mode==='demo'||!mapPickedTree){showTab('camera');return}
+ confirmedTree=mapPickedTree;confirmedAt=Date.now();confirmedOrigin=liveFix?{x:liveFix.x,y:liveFix.y}:null;
+ showTab('camera');renderState();$('manualTreeCard').scrollIntoView?.({block:'center',behavior:'smooth'});
+}
+function renderTreeChoice(){
+ if(confirmedTree&&(Date.now()-confirmedAt>120000||(confirmedOrigin&&freshPosition()&&Geometry.distance(liveFix,confirmedOrigin)>20)))clearTreeChoice(false);
+ $('manualTreeCard').hidden=mode!=='live'||!confirmedTree;
+ $('manualTreeName').textContent=confirmedTree?confirmedTree.demoNumber+' · '+confirmedTree.name:'';
+ $('selectedTreePanel').hidden=mode==='live';
+}
+$('chooseTreeOnMap').onclick=()=>{showTab('map');renderState()};
+$('clearTreeChoice').onclick=()=>clearTreeChoice();
+$('openManualTree').onclick=()=>{renderTreeChoice();if(confirmedTree)openCard(confirmedTree,'manual');else toast('Выбор истёк. Выберите дерево на плане снова.')};
+$('backCamera').onclick=confirmMapTree;
+
+fitMap();renderState();$('bootNotice').hidden=true;</script><script>let locationState='idle',locationErrorCode=null,locationEventAt=null;
+const locationEngine=new LocationController({
+ api:window.isSecureContext?navigator.geolocation:null,
+ onFix:ingestPosition,
+ onState:s=>{
+  locationState=s.state;window.gardenLocationState=s.state;locationErrorCode=s.errorCode;locationEventAt=Date.now();watchId=s.watchId;
+  $('gpsButton').textContent=s.wanted?'Остановить GPS':'Найти моё положение';
+  if(s.detail)gpsMessage(s.detail);
+  if(['stopped','paused','denied','unsupported'].includes(s.state)){liveFix=null;rawLiveFix=null;positionFilter.reset();pendingFix=null;gpsFix=null;clearInterval(gpsTicker);gpsTicker=null;if(mode==='live')renderState()}
+  if(mode==='live')renderState();if(typeof renderFieldHUD==='function')renderFieldHUD();
+ }
+});
+window.addEventListener('pageshow',()=>locationEngine.resume());
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){locationEngine.resume();if(locationEngine.active&&!freshPosition())locationEngine.request(true)}});
+function requestGPS(){
+ setMode('live');
+ if(sensorPolicy('geolocation')===false){gpsMessage('запрос заблокирован политикой страницы. Откройте прямую HTTPS-ссылку в отдельной вкладке Safari.');return}
+ if(locationEngine.active)locationEngine.request(true);else locationEngine.start();
+}
+$('retryGPS').onclick=requestGPS;
+</script><script>let fieldExpanded=false,armedLabel=null,orientationRequestEpoch=0;
+const cameraEngine=new CameraController({
+ video:$('video'),getMedia:constraints=>navigator.mediaDevices.getUserMedia(constraints),isHidden:()=>document.hidden,
+ onState:s=>{
+  stream=s.stream;cameraPending=s.pending;cameraReady=s.ready;
+  $('demoScene').hidden=true;$('cameraButton').disabled=false;
+  const cameraAction=cameraPending?'Отменить запрос камеры':stream?'Выключить камеру телефона':'Включить камеру телефона';
+  $('cameraButton').setAttribute('aria-label',cameraAction);$('cameraButton').setAttribute('title',cameraAction);
+  $('startSensors').disabled=cameraPending;$('fieldStart').disabled=cameraPending;$('retryCamera').disabled=cameraPending;
+  $('startSensors').textContent=cameraPending?'Ожидаем разрешение камеры…':'Начать прогулку';
+  $('cameraDiagButton').textContent=cameraPending?'Отменить запуск':stream?'Выключить камеру':'Включить камеру';
+  cameraMessage(s.detail);renderState();renderFieldHUD();
+ }
+});
+function setExpanded(value){
+ fieldExpanded=value;document.body.classList.toggle('camera-expanded',value);$('viewer').classList.toggle('field-camera',value);
+ $('closeField').hidden=!value;$('fieldHud').hidden=!value;$('expandCamera').setAttribute('aria-expanded',value);
+ if(value){showTab('camera');$('closeField').focus()}else{$('expandCamera').focus()}
+ renderFieldHUD();
+}
+function renderFieldHUD(){
+ const gps=freshPosition()?'GPS ±'+fmt(liveFix.accuracy)+' м':'GPS нет / устарел';
+ const direction=cameraHeading()===null?'направление не настроено':'направление '+(headingOffset?'по ориентиру':'приблизительное');
+ $('fieldSensorLine').textContent=(mode==='demo'?'СИМУЛЯЦИЯ · ':'')+(cameraReady?'Камера работает':cameraPending?'Запрос камеры…':'Камера остановлена')+' · '+gps+' · '+direction;
+ $('fieldHint').textContent=bearingTarget?'Наведите прицел на выбранный ориентир и зафиксируйте направление.':!cameraReady?$('cameraStatus').textContent:mode==='live'?$('statusText').textContent:'Демонстрационная позиция. Для прогулки запустите режим GPS.';
+ $('captureBearing').disabled=!cameraReady||!freshPosition()||!orientationSample||Date.now()-orientationSample.time>2500||orientationSample.bearing===null;
+ $('bearingPanel').hidden=!bearingTarget;
+ const video=$('video');const setting=stream?.getVideoTracks()[0]?.getSettings?.()||{};
+ $('cameraTechnical').textContent='Сборка v0.12 · '+(video.videoWidth&&video.videoHeight?`видеокадр ${video.videoWidth}×${video.videoHeight}`:'кадр пока не получен')+(setting.frameRate?' · запрос/режим '+Math.round(setting.frameRate)+' кадр/с':'');
+}
+function beginField(){
+ setMode('live');
+ // Safari requires the orientation permission call in this click's activation.
+ // Neither GPS nor compass depends on camera success or video.play().
+ const direction=startOrientation();
+ requestGPS();
+ const camera=!cameraReady&&!cameraEngine.pending?toggleCamera():Promise.resolve();
+ return Promise.allSettled([direction,camera]);
+}
+function resetBearingTarget(){bearingTarget=null;$('bearingPanel').hidden=true;renderState()}
+function captureBearing(){
+ if(!bearingTarget||!cameraReady||!freshPosition()||!orientationSample||Date.now()-orientationSample.time>2500||orientationSample.bearing===null){toast('Дождитесь камеры, GPS и показаний направления.');return}
+ const pos=correctedPosition();
+ if(Geometry.distance(pos,bearingTarget)<5){toast('Ориентир слишком близко. Выберите другой, дальше 5 м.');return}
+ headingOffset={value:Geometry.bearing(pos,bearingTarget)-orientationSample.bearing,time:Date.now(),kind:orientationSample.kind};
+ resetBearingTarget();toast('Направление зафиксировано. Теперь наведите камеру на дерево.');
+}
+$('startSensors').onclick=beginField;
+$('cameraEmptyStart').onclick=()=>{if(cameraEngine.pending){cameraEngine.stop();return}if(cameraEngine.stream)cameraEngine.stop('перезапуск…');void toggleCamera()};
+$('retryCamera').onclick=()=>{cameraEngine.stop('перезапуск…');void toggleCamera()};
+$('retryOrientation').onclick=()=>void startOrientation(true);
+$('cameraHeadingAction').onclick=()=>void startOrientation(true);
+$('cameraGPSAction').onclick=requestGPS;
+$('expandCamera').onclick=()=>setExpanded(true);$('closeField').onclick=()=>setExpanded(false);
+$('fieldStart').onclick=beginField;$('fieldStop').onclick=()=>cameraEngine.stop();
+$('fieldMap').onclick=()=>{setExpanded(false);showTab('map')};
+$('fieldOrient').onclick=()=>{if(!freshPosition()){toast('Сначала дождитесь GPS для настройки ориентира.');return}setExpanded(false);$('directionCorrection').onclick()};
+$('captureBearing').onclick=captureBearing;$('cancelBearing').onclick=resetBearingTarget;
+$('targetLabel').addEventListener('pointerdown',()=>{armedLabel=liveLabel?.id||null});
+$('targetLabel').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')armedLabel=liveLabel?.id||null});
+$('targetLabel').onclick=()=>{
+ if(mode==='demo'){openCameraCard();return}
+ const id=armedLabel;armedLabel=null;
+ if(id&&liveLabel?.id===id&&freshPosition()&&cameraHeading()!==null&&cameraReady)openCard(liveLabel,'candidate');
+ else toast('Наведение изменилось. Ещё раз наведите камеру и коснитесь подписи.');
+};
+for(const name of ['waiting','pause'])$('video').addEventListener(name,()=>{if(stream){cameraReady=false;cameraEngine.ready=false;cameraMessage('изображение приостановлено. Если не возобновится, нажмите «Возобновить».');renderState()}});
+$('video').addEventListener('playing',()=>{if(stream&&!document.hidden&&stream.getVideoTracks().some(t=>t.readyState==='live'&&!t.muted)){cameraReady=true;cameraEngine.ready=true;cameraMessage('задняя камера включена.');renderState()}});
+$('video').addEventListener('error',()=>{if(stream)cameraEngine.stop('ошибка видеопотока. Нажмите «Возобновить».','error')});
+function suspendField(){
+ orientationRequestEpoch++;clearTimeout(orientationWaitTimer);orientationWaiting=false;cameraEngine.stop('остановлена при сворачивании. Вернитесь и нажмите «Начать прогулку» или «Запустить / возобновить».');
+ /* The browser suspends location in background; preserve the watch and user intent. */bearingTarget=null;orientationSample=null;headingOffset=null;positionOffset=null;candidateGate.update(null,Date.now());
+ window.removeEventListener('deviceorientation',onOrientation);window.removeEventListener('deviceorientationabsolute',onOrientation);renderState();
+}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)suspendField();else {resumeOrientation();renderState()}});window.addEventListener('pagehide',()=>{suspendField();locationEngine.pause()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&fieldExpanded&&!$('treeDialog').open&&!$('helpDialog').open)setExpanded(false)});
+$('copyDiagnostics').onclick=async()=>{
+ const report={build:'0.12',secureContext:window.isSecureContext,embedded:window.self!==window.top,orientationPermission,orientationError,geolocationPolicy:sensorPolicy('geolocation'),orientationPolicy:['accelerometer','gyroscope','magnetometer'].map(sensorPolicy),camera:cameraReady?'ready':cameraPending?'pending':'stopped',video:[$('video').videoWidth||0,$('video').videoHeight||0],gpsState:locationState,gpsErrorCode:locationErrorCode,gpsWanted:locationEngine.wanted,gpsWatchActive:locationEngine.active,layout:document.documentElement.classList.contains('phone-layout')?'phone':'responsive',viewport:[window.innerWidth,window.innerHeight],gpsAccuracy:liveFix?.reportedAccuracy??liveFix?.accuracy??null,searchUncertainty:liveFix?.accuracy??null,filterOffset:liveFix?.filterOffset??null,filterSamples:liveFix?.sampleCount??0,gpsAgeSeconds:liveFix?Math.round((Date.now()-liveFix.time)/1000):null,headingSource:orientationSample?.kind||null,headingAccuracy:orientationSample?.accuracy??null,headingReference:orientationSample?.reference??null,headingFresh:!!orientationSample&&Date.now()-orientationSample.time<=2500,headingCalibrated:!!headingOffset,positionCorrected:!!positionOffset,message:$('statusText').textContent,cameraMessage:$('cameraStatus').textContent};
+ const text=JSON.stringify(report,null,2);$('diagnosticsText').value=text;$('diagnosticsText').hidden=false;
+ try{await navigator.clipboard.writeText(text);toast('Состояние скопировано. Координат и изображения камеры в отчёте нет.')}catch{toast('Скопируйте текст из появившегося поля.')}
+};
+renderFieldHUD();
+
+setInterval(()=>{if(!document.hidden&&mode==='live'){if(orientationAllowed()&&(!orientationSample||Date.now()-orientationSample.time>2500))resumeOrientation();renderTreeChoice();renderState()}},2000);
+</script></body></html>
