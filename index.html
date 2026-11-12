@@ -434,7 +434,7 @@ function renderLiveState(){
  if(fresh&&pos){
   visitor=pos;accuracy=liveFix.accuracy;if(h!==null)heading=h;
   const rows=LiveGeo.nearby(DATA.trees,pos),nearest=rows[0],selectedDistance=Geometry.distance(selected,pos);
-  $('distanceValue').textContent=fmt(liveFix.reportedAccuracy??accuracy);$('viewCaption').textContent='погрешность GPS · ± м';
+  $('distanceValue').textContent=fmt(nearest.distance);$('viewCaption').textContent='до дерева «'+nearest.tree.name+'» · GPS ±'+fmt(liveFix.reportedAccuracy??accuracy)+' м';
   $('mapDistance').textContent=mapPickedTree?'До выбранной точки ≈ '+fmt(Geometry.distance(mapPickedTree,pos))+' м · GPS ±'+fmt(accuracy)+' м':'GPS ±'+fmt(accuracy)+' м. Круг показывает неопределённость позиции.';
   msg=nearest.distance>500?'Вы далеко от точек съёмки. Подписи скрыты.':accuracy>50?'GPS слишком неточный. Подождите на открытом месте.':'GPS подключён. Наведите камеру на дерево; для подписи нужно направление компаса.';
   const possible=LiveGeo.possible(DATA.trees,{...pos,accuracy});
