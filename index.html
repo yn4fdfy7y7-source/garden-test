@@ -310,7 +310,7 @@ $('distanceSlider').oninput=e=>changeDistance(Number(e.target.value));$('angleSl
 $('showMapButton').onclick=()=>{showTab('map');zoomTree()};$('backCamera').onclick=()=>showTab('camera');$('zoomIn').onclick=()=>zoomMap(.65);$('zoomOut').onclick=()=>zoomMap(1.55);$('fitMap').onclick=fitMap;
 $('searchInput').oninput=renderCatalog;$('savedFilter').onclick=()=>{onlySaved=!onlySaved;$('savedFilter').setAttribute('aria-pressed',onlySaved);$('savedFilter').style.background=onlySaved?'#e0ebca':'';renderCatalog()};
 $('closeTree').onclick=closeTree;$('dialogMap').onclick=()=>{const t=currentCard;closeTree();selectTree(t,{reset:false});showTab('map');zoomTree()};$('dialogCamera').onclick=()=>{const t=currentCard;closeTree();selectTree(t);showTab('camera')};
-$('helpButton').onclick=()=>$('helpDialog').showModal();$('closeHelp').onclick=()=>$('helpDialog').close();$('startDemo').onclick=()=>{$('helpDialog').close();setMode('demo');showTab('camera');reset()};
+$('helpButton').onclick=()=>$('helpDialog').showModal();$('closeHelp').onclick=()=>$('helpDialog').close();$('startDemo').hidden=true;$('startDemo').onclick=()=>{$('helpDialog').close();setMode('live');showTab('camera')};
 for(const d of [$('treeDialog'),$('helpDialog')])d.addEventListener('click',e=>{if(e.target===d){const r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close()}});
 $('cameraButton').onclick=toggleCamera;$('cameraDiagButton').onclick=toggleCamera;$('gpsButton').onclick=toggleGPS;
 
@@ -489,7 +489,7 @@ function chooseMapPoint(point){
  }
  mapAction=null;$('mapActionHint').textContent='Нажмите на дерево, чтобы выбрать его. Оранжевая точка — GPS телефона.';renderState();
 }
-$('liveMode').onclick=()=>setMode('live');$('demoMode').onclick=()=>setMode('demo');
+$('liveMode').onclick=()=>setMode('live');$('demoMode').onclick=()=>setMode('live');$('demoMode').hidden=true; // TEST BUILD: simulation disabled, GPS only
 $('positionCorrection').onclick=()=>{if(!freshPosition()){toast('Дождитесь свежего GPS.');return}mapAction='position';showTab('map');$('mapActionHint').textContent='Стойте на известной точке. Нажмите на её место на плане. Это ручная поправка, а не измерение точности.'};
 $('directionCorrection').onclick=()=>{if(!freshPosition()){toast('Дождитесь свежего GPS.');return}void startOrientation();bearingTarget=null;mapAction='direction';showTab('map');$('mapActionHint').textContent='Шаг 1: выберите известный ориентир дальше 5 м. Затем откроется камера для наведения и фиксации.'};
 $('clearCorrection').onclick=()=>{positionOffset=null;headingOffset=null;mapAction=null;bearingTarget=null;renderState();toast('Ручные поправки сброшены.')};
