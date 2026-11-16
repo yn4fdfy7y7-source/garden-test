@@ -103,9 +103,36 @@ function classify(v) {
   return { room: best.id, dist: best.d, conf, second: second && second.id };
 }
 let recording = null; // {room, left, samples}
+/* ---------- zone by network (phone hotspot): external IP -> room ---------- */
+let pubIp = null, pubIpAt = 0, ipBusy = false;
+async function fetchIp() {
+  if (ipBusy) return; ipBusy = true;
+  for (const u of ['https://api.ipify.org?format=json', 'https://api64.ipify.org?format=json', 'https://ipinfo.io/json']) {
+    try { const r = await fetch(u, { cache: 'no-store' }); const j = await r.json(); if (j.ip) { pubIp = j.ip; pubIpAt = Date.now(); break } } catch (e) {}
+  }
+  ipBusy = false; if (tab === 'set') renderIp();
+}
+function ipZone() {
+  if (Date.now() - pubIpAt > 8000) fetchIp();
+  D.ipRooms = D.ipRooms || {};
+  const room = pubIp && D.ipRooms[pubIp];
+  const changed = (room || null) !== zone.room;
+  zone = room ? { room, conf: 1, why: 'по сети · внешний IP ' + pubIp } : { room: null, conf: 0, why: pubIp ? 'Сеть ' + pubIp + ' не привязана к кабинету: Настройка → Кабинет по сети' : 'Определяю сеть…' };
+  $('zone').textContent = room ? roomLabel(room) : 'Поиск по всем предметам';
+  $('zoneWhy').textContent = zone.why;
+  if (changed && tab === 'plan') drawPlan();
+}
+function renderIp() {
+  const el = $('ipInfo'); if (!el) return;
+  D.ipRooms = D.ipRooms || {};
+  el.textContent = pubIp ? 'Сейчас внешний IP: ' + pubIp + (D.ipRooms[pubIp] ? ' → ' + roomLabel(D.ipRooms[pubIp]) : ' (не привязан)') : 'Внешний IP ещё не получен';
+  const sel = $('ipRoom'); if (!sel.options.length) for (const r of mainRooms()) { const o = document.createElement('option'); o.value = r.id; o.textContent = r.name + ', ' + r.floor + ' этаж'; sel.append(o) }
+  const L = $('ipList'); L.textContent = '';
+  for (const [ip, rid] of Object.entries(D.ipRooms)) { const it = document.createElement('div'); it.className = 'item'; it.innerHTML = '<div class="t"><b></b><span></span></div>'; it.querySelector('b').textContent = roomLabel(rid); it.querySelector('span').textContent = ip; const x = document.createElement('button'); x.type = 'button'; x.className = 'btn'; x.textContent = '×'; x.onclick = () => { delete D.ipRooms[ip]; save(); renderIp() }; it.append(x); L.append(it) }
+}
 function wifiTick() {
   if (HAS_NATIVE) try { Native.startScan() } catch (e) {}
-  const s = readScan(); if (!s) { if (!HAS_NATIVE) { $('zone').textContent = 'Поиск по всем предметам'; $('zoneWhy').textContent = 'Сайт не видит Wi-Fi, поэтому кабинет не определяется' } else $('zoneWhy').textContent = 'Wi-Fi: нет данных'; return }
+  const s = readScan(); if (!s) { if (!HAS_NATIVE) ipZone(); else $('zoneWhy').textContent = 'Wi-Fi: нет данных'; return }
   lastScan = { list: s.results || [], connected: s.connected, at: Date.now() };
   const v = scanVector(s);
   if (recording) {
@@ -322,6 +349,7 @@ function drawPlanOverlayOnly() { for (const p of $('planSvg').querySelectorAll('
 
 /* ---------- settings ---------- */
 function renderSettings() {
+  renderIp();
   const L = $('roomList'); L.textContent = '';
   for (const r of mainRooms()) {
     const n = D.prints[r.id] ? Object.keys(D.prints[r.id]).length : 0;
@@ -384,5 +412,7 @@ $('resetBtn').onclick = () => { if ($('resetBtn').dataset.sure) { D = { version:
 fetch('plan.json').then(r => r.json()).then(p => {
   PLAN = p; load(); startCamera(); initCv();
   wifiTick(); setInterval(wifiTick, 3000); setInterval(recogTick, 450); setInterval(renderLabel, 300);
+  $('ipSave').onclick = () => { if (!pubIp) { toast('Внешний IP ещё не получен, подождите'); fetchIp(); return } D.ipRooms = D.ipRooms || {}; D.ipRooms[pubIp] = $('ipRoom').value; save(); renderIp(); ipZone(); toast('Сеть ' + pubIp + ' → ' + roomLabel($('ipRoom').value)) };
+  renderIp(); $('ipRoom').value = 'r11';
   window.__test = { D: () => D, zone: () => zone, setMockRoom: r => mockRoom = r, shown: () => shown, cvReady: () => cvReady };
 });

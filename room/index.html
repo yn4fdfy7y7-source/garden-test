@@ -101,6 +101,15 @@ dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0}dt{color:va
     </div>
 
     <div class="card">
+      <h2>Кабинет по сети (раздача с телефона)</h2>
+      <p class="muted">Подключитесь к раздаче в кабинете, выберите кабинет и нажмите «Запомнить». Сайт узнаёт сеть по внешнему IP раздающего телефона.</p>
+      <div class="muted" id="ipInfo">Внешний IP ещё не получен</div>
+      <label class="f">Кабинет<select id="ipRoom"></select></label>
+      <button class="btn primary" id="ipSave" type="button">Запомнить эту сеть для кабинета</button>
+      <div class="list" id="ipList"></div>
+    </div>
+
+    <div class="card">
       <h2>2. Предметы</h2>
       <p class="muted">Для каждого предмета: название и характеристики, точка на плане и 4–8 эталонных снимков камерой.</p>
       <button class="btn primary" id="addObj" type="button">Добавить предмет</button>
