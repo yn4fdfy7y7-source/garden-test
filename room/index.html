@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Где я · тест</title>
+<style>
+/* Tokens from the garden site v0.12 */
+:root{--bg:#f5f4ed;--paper:#fffef9;--green:#193f33;--muted:#64726a;--line:#dddfd3;--accent:#d5ed87;--soft:#e9edde;--ochre:#b46a2d;--pink:#e64aa8;--radius:20px}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--green);font:16px/1.45 Inter,Roboto,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit}
+.view{position:fixed;inset:0 0 64px 0;overflow:auto}
+.view[hidden]{display:none}
+nav{position:fixed;left:0;right:0;bottom:0;height:64px;display:grid;grid-template-columns:repeat(3,1fr);background:var(--paper);border-top:1px solid var(--line);z-index:20}
+nav button{border:0;background:none;font-size:14px;color:var(--muted)}
+nav button[aria-current=true]{color:var(--green);font-weight:700;background:var(--soft)}
+/* camera */
+#vCam{background:#0e1c16;overflow:hidden}
+#video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.chip{position:absolute;left:12px;right:12px;top:12px;background:rgba(14,28,22,.78);color:#fff;border-radius:16px;padding:10px 14px;z-index:3}
+.chip b{font:600 20px Georgia,serif;display:block}
+.chip span{font-size:13px;opacity:.85}
+.hint{position:absolute;left:12px;right:12px;bottom:12px;background:rgba(14,28,22,.78);color:#fff;border-radius:14px;padding:10px 14px;font-size:14px;z-index:3}
+.label{position:absolute;transform:translate(-50%,-100%);background:var(--paper);color:var(--green);border:0;border-radius:12px;padding:8px 14px 9px;box-shadow:0 6px 18px rgba(0,0,0,.4);z-index:4;text-align:center;min-width:110px}
+.label::after{content:"";position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);border:8px solid transparent;border-top-color:var(--paper);border-bottom:0}
+.label b{display:block;font-size:16px}.label small{color:var(--muted);font-size:12px}
+.capbar{position:absolute;left:12px;right:12px;bottom:12px;z-index:5;background:var(--paper);border-radius:16px;padding:12px;display:grid;gap:10px}
+.capbar .row{display:flex;gap:8px}
+.btn{border:1px solid var(--line);background:var(--paper);border-radius:12px;padding:11px 14px;cursor:pointer}
+.btn.primary{background:var(--green);color:var(--paper);border-color:var(--green)}
+.btn.warn{color:#9c3b1d}
+.grow{flex:1}
+/* pages */
+.page{padding:16px;display:grid;gap:14px;max-width:720px;margin:0 auto}
+h1{font:600 26px/1.15 Georgia,serif;margin:4px 0}
+h2{font:600 19px Georgia,serif;margin:0}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:14px;display:grid;gap:10px}
+.muted{color:var(--muted);font-size:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.list{display:grid;gap:8px}
+.item{display:flex;gap:10px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:var(--paper)}
+.item .t{min-width:0}.item .t b{display:block}.item .t span{font-size:13px;color:var(--muted)}
+.tag{font-size:12px;border-radius:999px;padding:2px 8px;background:var(--soft)}
+.tag.ok{background:var(--accent)}
+.plan{position:relative;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:#fff}
+.plan img{display:block;width:100%;height:auto}
+.plan svg{position:absolute;inset:0;width:100%;height:100%}
+.rp{fill:transparent}.rp.cur{fill:rgba(213,237,135,.6);stroke:#6d9b3a;stroke-width:6}
+.ap{fill:var(--pink);stroke:#fff;stroke-width:5}
+.pin{fill:var(--green);stroke:#fff;stroke-width:5}
+.pin.sel{fill:var(--ochre)}
+.rn{font:600 46px Inter,Arial,sans-serif;fill:var(--green);paint-order:stroke;stroke:#fff;stroke-width:10px}
+.pn{font:600 40px Inter,Arial,sans-serif;fill:var(--green);paint-order:stroke;stroke:#fff;stroke-width:10px}
+table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+td,th{padding:4px 6px;border-bottom:1px solid var(--line);text-align:left}
+input,select,textarea{width:100%;font:inherit;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--green)}
+textarea{min-height:90px}
+label.f{display:grid;gap:4px;font-size:14px;color:var(--muted)}
+.sheet{position:fixed;left:0;right:0;bottom:0;max-height:88%;overflow:auto;background:var(--paper);border-radius:22px 22px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.25);padding:18px 16px 24px;z-index:30;display:grid;gap:12px}
+.sheet[hidden]{display:none}
+.sheet h2{font-size:22px}
+dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0}dt{color:var(--muted)}dd{margin:0}
+.toast{position:fixed;left:50%;top:16px;transform:translateX(-50%);background:var(--green);color:#fff;padding:10px 16px;border-radius:12px;z-index:40;font-size:14px;max-width:90%}
+.toast[hidden]{display:none}
+</style>
+</head>
+<body>
+
+<section class="view" id="vCam">
+  <video id="video" playsinline muted autoplay></video>
+  <div class="chip"><b id="zone">Определяю кабинет…</b><span id="zoneWhy">Wi-Fi: ожидание сканирования</span></div>
+  <div id="labels"></div>
+  <div class="hint" id="hint">Наведите камеру на предмет</div>
+  <div class="capbar" id="capbar" hidden>
+    <div><b id="capTitle">Эталон</b><div class="muted" id="capInfo">Наведите камеру так, чтобы предмет занимал большую часть кадра, и нажмите «Снять». Снимите 4–8 раз с разных сторон.</div></div>
+    <div class="row"><button class="btn primary grow" id="capShot" type="button">Снять</button><button class="btn" id="capDone" type="button">Готово</button></div>
+  </div>
+</section>
+
+<section class="view" id="vPlan" hidden>
+  <div class="page">
+    <h1>План здания</h1>
+    <div class="row"><button class="btn" id="fl1" type="button">1 этаж</button><button class="btn" id="fl2" type="button">2 этаж</button><span class="muted" id="planHint"></span></div>
+    <div class="plan"><img id="planImg" alt="План этажа"><svg id="planSvg"></svg></div>
+    <p class="muted">Розовые точки — MikroTik по чертежу. Зелёные — предметы. Подсвечен кабинет, где вы сейчас по Wi-Fi.</p>
+  </div>
+</section>
+
+<section class="view" id="vSet" hidden>
+  <div class="page">
+    <h1>Настройка</h1>
+
+    <div class="card">
+      <h2>1. Кабинеты по Wi-Fi</h2>
+      <p class="muted" id="webNote" hidden>На сайте этот раздел не работает: браузер не видит Wi-Fi. Он работает в приложении для Android.</p>
+      <p class="muted">Встаньте в кабинете и нажмите «Записать здесь». Запись идёт около 20 секунд, телефон держите в руке. Чем больше кабинетов записано, тем точнее определение.</p>
+      <div class="muted" id="scanInfo">Сканирование ещё не было.</div>
+      <div class="list" id="roomList"></div>
+    </div>
+
+    <div class="card">
+      <h2>2. Предметы</h2>
+      <p class="muted">Для каждого предмета: название и характеристики, точка на плане и 4–8 эталонных снимков камерой.</p>
+      <button class="btn primary" id="addObj" type="button">Добавить предмет</button>
+      <div class="list" id="objList"></div>
+    </div>
+
+    <div class="card">
+      <h2>3. Данные</h2>
+      <div class="row"><button class="btn" id="exportBtn" type="button">Отправить данные (без снимков)</button><button class="btn warn" id="resetBtn" type="button">Сбросить всё</button></div>
+      <div class="muted" id="ver">Версия 0.1.0</div>
+    </div>
+
+    <div class="card">
+      <h2>Точки Wi-Fi рядом</h2>
+      <div style="overflow-x:auto"><table id="scanTable"><tr><td class="muted">Нет данных</td></tr></table></div>
+    </div>
+  </div>
+</section>
+
+<nav>
+  <button type="button" id="tCam" aria-current="true">Камера</button>
+  <button type="button" id="tPlan">План</button>
+  <button type="button" id="tSet">Настройка</button>
+</nav>
+
+<div class="sheet" id="card" hidden role="dialog" aria-modal="true">
+  <h2 id="cName"></h2>
+  <div class="muted" id="cRoom"></div>
+  <p id="cDesc" style="margin:0"></p>
+  <dl id="cFacts"></dl>
+  <button class="btn" type="button" id="cClose">Закрыть</button>
+</div>
+
+<div class="sheet" id="editor" hidden role="dialog" aria-modal="true">
+  <h2 id="eTitle">Предмет</h2>
+  <label class="f">Название<input id="eName" maxlength="80"></label>
+  <label class="f">Кабинет<select id="eRoom"></select></label>
+  <label class="f">Описание<input id="eDesc" maxlength="200"></label>
+  <label class="f">Характеристики, по строке «Название: значение»<textarea id="eFacts"></textarea></label>
+  <div class="muted" id="eStat"></div>
+  <div class="row">
+    <button class="btn primary grow" id="eSave" type="button">Сохранить</button>
+    <button class="btn grow" id="eShots" type="button">Снять эталоны</button>
+    <button class="btn grow" id="ePlace" type="button">Отметить на плане</button>
+  </div>
+  <div class="row"><button class="btn warn" id="eDel" type="button">Удалить предмет</button><button class="btn" id="eClearShots" type="button">Удалить снимки</button><button class="btn" id="eClose" type="button">Закрыть</button></div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="opencv.js" async></script>
+<script src="app.js"></script>
+<script>if(typeof window.Native==='undefined'&&!/mock/.test(location.search))document.getElementById('webNote').hidden=false</script>
+</body>
+</html>
