@@ -69,6 +69,11 @@ function onOrient(e, abs) {
 }
 if ('ondeviceorientationabsolute' in window) addEventListener('deviceorientationabsolute', e => onOrient(e, true));
 addEventListener('deviceorientation', e => onOrient(e, false));
+/* iPhone: compass needs a permission request from a tap */
+addEventListener('click', function askOrient() {
+  removeEventListener('click', askOrient, true);
+  if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') DeviceOrientationEvent.requestPermission().catch(() => {});
+}, true);
 const headingOk = () => heading != null && Date.now() - headingAt < 3000;
 const angDiff = (a, b) => Math.abs(((a - b + 540) % 360) - 180);
 
