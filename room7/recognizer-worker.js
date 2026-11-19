@@ -15,7 +15,7 @@ async function installMap(packet) {
       self.cv.then(()=>resolve());
     });
   }
-  const [{createOrbSolver},{projectRoomAnchors}]=await Promise.all([import('./orb-solver.js?v=field3'),import('./scan-geometry.js')]);
+  const [{createOrbSolver},{projectRoomAnchors}]=await Promise.all([import('./orb-solver.js?v=field3b'),import('./scan-geometry.js')]);
   const {createSurfaceMatcher}=await import('./surface-match.js?v=field3');
   solve=await createOrbSolver(self.cv, parsed.solverData, (kernel,base)=>
     createSurfaceMatcher(self.cv,packet.imageSurfaces,kernel,base));
@@ -38,7 +38,9 @@ async function recognize({buffer,width,height,continuous}) {
       diagnostics:{...diagnostics,method:'planar surface',inliers:Math.max(...surfaces.map(a=>a.inliers))}};
   }
   const {anchors,center}=project(room,pose,width,height);
-  return {status:'accepted',anchors,diagnostics:{...diagnostics,scanCenterM:center}};
+  const measured=diagnostics.metricRangeReliable!==false;
+  return {status:'accepted',anchors:measured?anchors:anchors.map(a=>({...a,distanceM:null})),
+    diagnostics:{...diagnostics,scanCenterM:center}};
 }
 
 self.onmessage = async ({data})=>{

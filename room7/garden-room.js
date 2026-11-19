@@ -1,5 +1,5 @@
 import {createViewTracker} from './view-guard.js?v=field3';
-import * as roomEngine from './engine.js?v=field3';
+import * as roomEngine from './engine.js?v=field3b';
 
 const viewer = document.getElementById('viewer');
 const labels = document.getElementById('roomLabels');
@@ -8,7 +8,7 @@ const dialog = document.getElementById('roomCard');
 const tracker = createViewTracker();
 const snapshot = document.createElement('canvas');
 const context = snapshot.getContext('2d', {willReadFrequently:true});
-const waiting = 'Наведите камеру на дверь «201» или на окна. Захватите часть стены вокруг ориентира.';
+const waiting = 'Ищу ориентиры. Наведите камеру на дверь «201», окна или мебель и захватите часть стены.';
 let cards, pendingMap, retryAfter = 0;
 let activeVideo = null, epoch = 0, busy = false;
 let evidence = null, currentFrame = null, pendingPose = null;
@@ -23,7 +23,7 @@ const obscured = new Map();
 async function loadMap() {
   if (!pendingMap) {
     pendingMap = (async () => {
-      const response = await fetch(new URL('./room7-map.json?v=field3',import.meta.url));
+      const response = await fetch(new URL('./room7-map.json?v=field3b',import.meta.url));
       if (!response.ok) throw new Error('Карта недоступна');
       const map = await response.json();
       await roomEngine.useLocalMap(map);
@@ -95,27 +95,58 @@ function createLabel(anchor) {
   return element;
 }
 
+// Keep adjacent labels individually tappable while each pointer stays on its object.
+function placeLabel(px, py, w, h, width, height, occupied) {
+  const half = w/2, inset = Math.max(0, half-10);
+  const preferBelow = py < h+8;
+  let best, leastOverlap = Infinity;
+  for (let row=0; row<=occupied.length; row++) {
+    const extension = row*(h+6);
+    for (const below of [preferBelow, !preferBelow]) {
+      const y = below ? py+7+extension : py-7-extension-h;
+      if (y < 0 || y+h > height) continue;
+      for (const offset of [0, -inset, inset]) {
+        const x = Math.min(Math.max(px+offset, half+2), width-half-2);
+        const box = {left:x-half, right:x+half, top:y, bottom:y+h};
+        let overlap = 0;
+        for (const other of occupied) {
+          overlap += Math.max(0, Math.min(box.right,other.right+4)-Math.max(box.left,other.left-4)) *
+            Math.max(0, Math.min(box.bottom,other.bottom+4)-Math.max(box.top,other.top-4));
+        }
+        if (overlap < leastOverlap) {
+          best = {x, y:below ? box.top : box.bottom, below, extension, box};
+          leastOverlap = overlap;
+        }
+        if (!overlap) return best;
+      }
+    }
+  }
+  return best;
+}
+
 function renderLabels(video) {
   const width = viewer.clientWidth, height = viewer.clientHeight;
   if (!width || !height || !video.videoWidth || !video.videoHeight) return;
   const scale = Math.min(width / video.videoWidth, height / video.videoHeight);
   const vw = scale * video.videoWidth, vh = scale * video.videoHeight;
   const previous = new Map(Array.from(labels.children, button => [button.dataset.anchor,button]));
+  const occupied = [];
   visible.clear();
   for (const anchor of evidence.anchors) {
     if (nearOnly.checked && !(Number.isFinite(anchor.distanceM) && anchor.distanceM >= 0 && anchor.distanceM <= 1)) continue;
     const {x, y} = anchor;
     if (x < 0 || x > 1 || y < 0 || y > 1) continue;
     const button = previous.get(anchor.id) || createLabel(anchor);
-    previous.delete(anchor.id);
     const px = (width-vw)/2 + x*vw, py = (height-vh)/2 + y*vh;
-    const half = button.offsetWidth/2;
-    const labelX = Math.min(Math.max(px,half+2),width-half-2);
-    const below = py < button.offsetHeight+8;
-    button.dataset.below = String(below);
-    button.style.left = labelX+'px';
-    button.style.top = (below ? py+7 : py-7)+'px';
-    button.style.setProperty('--pointer-x',(half+px-labelX)+'px');
+    const placement = placeLabel(px,py,button.offsetWidth,button.offsetHeight,width,height,occupied);
+    if (!placement) { button.remove(); continue; }
+    previous.delete(anchor.id);
+    occupied.push(placement.box);
+    button.dataset.below = String(placement.below);
+    button.style.left = placement.x+'px';
+    button.style.top = placement.y+'px';
+    button.style.setProperty('--pointer-x',(px-placement.box.left)+'px');
+    button.style.setProperty('--pointer-extension',placement.extension+'px');
     visible.set(anchor.id,anchor);
   }
   for (const button of previous.values()) button.remove();
@@ -123,7 +154,7 @@ function renderLabels(video) {
     nearOnly.checked && evidence.anchors.some(anchor => !Number.isFinite(anchor.distanceM))
       ? 'Близость ориентира не подтверждена. Снимите ограничение «Только в пределах 1 м».' :
     nearOnly.checked && evidence.anchors.length ? 'Ориентиры дальше метра. Снимите ограничение или подойдите ближе.' :
-    'Кабинет распознан. Чтобы увидеть подпись, повернитесь к двери или окнам.';
+    'Кабинет распознан. Поверните камеру к столу, шкафу, дивану или окнам.';
   reportRoom(message,true);
 }
 

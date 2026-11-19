@@ -252,6 +252,35 @@ function verifyReferences(cv, all, projected, scene) {
   }
   return groups.sort((a,b)=>b.rank-a.rank);
 }
+// Pairwise image homographies are computed before the pose is known. When a wall
+// spans several small source views, pool their surviving observations for another
+// unseeded, scan-only PnP rather than requiring one view to see the entire wall.
+function pooledScanPairs(groups,xyz) {
+  const votes=new Map();
+  for(const group of groups) {
+    for(const m of group.matches) {
+      const row={p:m.p,quality:group.rank/(m.distance+14)};
+      if(votes.has(m.q))votes.get(m.q).push(row);else votes.set(m.q,[row]);
+    }
+  }
+  const result=[];
+  for(const [q,rows] of votes) {
+    let highest=-1, winner=null;
+    for(const a of rows) {
+      let score=0;
+      const k=a.p*3;
+      for(const b of rows) {
+        const j=b.p*3;
+        const d=(xyz[k]-xyz[j])**2+(xyz[k+1]-xyz[j+1])**2+(xyz[k+2]-xyz[j+2])**2;
+        if(d<.14**2)score+=b.quality;
+      }
+      if(score>highest){winner=a;highest=score;}
+    }
+    result.push({q,p:winner.p});
+  }
+  return result;
+}
+
 function sourcePixels(frames,xyz) {
   const uv=new Float32Array(xyz.length/3*2);
   for(const frame of frames) {
@@ -264,6 +293,34 @@ function sourcePixels(frames,xyz) {
     }
   }
   return uv;
+}
+
+// With mostly frontal, coplanar evidence, camera distance can trade off against focal
+// length. Keep the projection but suppress metres if an equally good fit moves the camera.
+function hasReliableRange(cv, pose, stats, xyz, scene) {
+  const pairs=stats.pairs;
+  const baseRms=Math.sqrt(pairs.reduce((sum,m)=>sum+m.err,0)/pairs.length);
+  const maxRms=baseRms+.25;
+  const cx=(scene.w-1)/2,cy=(scene.h-1)/2,edge=Math.max(scene.w,scene.h);
+  for(const factor of [.8,1.25]) {
+    const f=pose.f*factor;
+    if(f < .28*edge || f > 1.85*edge) continue;
+    const alt=solvePose(cv,pairs,xyz,scene,f,true,pose);
+    if(!alt || Math.hypot(...alt.C.map((v,i)=>v-pose.C[i]))<=.30) continue;
+    const {R,t}=alt;
+    let loss=0;
+    for(const {q,p} of pairs) {
+      const k=p*3,x=xyz[k],y=xyz[k+1],z=xyz[k+2];
+      const depth=R[6]*x+R[7]*y+R[8]*z+t[2];
+      if(depth<=.15){loss+=36;continue;}
+      const u=cx+f*(R[0]*x+R[1]*y+R[2]*z+t[0])/depth;
+      const v=cy+f*(R[3]*x+R[4]*y+R[5]*z+t[1])/depth;
+      const pt=scene.xy[q];
+      loss+=Math.min(36,(u-pt.x)**2+(v-pt.y)**2);
+    }
+    if(loss<=pairs.length*maxRms**2) return false;
+  }
+  return true;
 }
 
 export async function createOrbSolver(cv, suppliedMap, createFallback = null) {
@@ -361,7 +418,7 @@ export async function createOrbSolver(cv, suppliedMap, createFallback = null) {
   const notFound=(reason,inliers=0)=>({status:'searching',inliers,diagnostics:{method:'ORB/PnP',reason,inliers}});
   function result(pose,stats,scene,method) {
     return {status:'accepted',R:pose.R,t:pose.t,focalPx:pose.f/scene.scale,inliers:stats.inliers,
-      diagnostics:{method,inliers:stats.inliers,cells:stats.cells,coverage:stats.hull,references:stats.references,
+      diagnostics:{method,metricRangeReliable:hasReliableRange(cv,pose,stats,xyz,scene),inliers:stats.inliers,cells:stats.cells,coverage:stats.hull,references:stats.references,
         medianErrorPx:stats.medianError,focalRatio:pose.f/Math.max(scene.w,scene.h)}};
   }
   // Rank views from map-wide descriptor matches before running expensive full-resolution fits.
@@ -482,7 +539,7 @@ export async function createOrbSolver(cv, suppliedMap, createFallback = null) {
     }
     // A phone descriptor can propose a camera pose. Its metric position also has to
     // survive a new PnP fit whose observations come exclusively from the scan.
-    if (corroborated && best.stats.referenceVotes.some(g=>cameras.get(g.id).sourceKind==='phone')) {
+    if (best.stats.referenceVotes.some(g=>cameras.get(g.id).sourceKind==='phone')) {
       const scanGroups=all.filter(g=>cameras.get(g.id).sourceKind!=='phone');
       const scanEvidence=support(best.pose,scanGroups,xyz,scene);
       if(!scanEvidence) return notFound('insufficient_scan_support',best.stats.inliers);
@@ -497,6 +554,21 @@ export async function createOrbSolver(cv, suppliedMap, createFallback = null) {
         const check=support(independent,scanGroups,xyz,scene);
         if(check && check.inliers>=.62*scanEvidence.inliers) {verified=true;break;}
       }
+      if(!verified && scanEvidence.inliers>=35 && scanEvidence.cells>=5) {
+        const eligible=sources.filter(g=>g.matches.length>=8 && g.rank>=1.7);
+        const pools=[pooledScanPairs(eligible.slice(0,4),xyz), pooledScanPairs(eligible,xyz), multiviewPairs(scanGroups,xyz,-1000)];
+        for(const pairs of pools){
+          if(pairs.length<16)continue;
+          const p=solvePose(cv,pairs,xyz,scene,best.pose.f,false,null,1200);
+          if(!p)continue;
+          const check=support(p,scanGroups,xyz,scene);
+          if(!check || check.inliers<.62*scanEvidence.inliers)continue;
+          const precise=solvePose(cv,check.pairs,xyz,scene,best.pose.f,true,p);
+          const [distance,angle]=separation(best.pose,precise || p);
+          if(distance<=.20 && angle<=Math.PI/36){verified=true;break;}
+        }
+      }
+      if(verified && cameras.get(best.referenceId)?.sourceKind==='phone')corroborated=true;
       if(!verified)return notFound('independent_scan_fit_failed',best.stats.inliers);
     }
     if (!corroborated) return notFound('independent_views_disagree',best.stats.inliers);
