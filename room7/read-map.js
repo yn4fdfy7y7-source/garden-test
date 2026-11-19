@@ -25,6 +25,8 @@ export function unpackLocalMap(packet) {
     if (frame.projection !== undefined && (!Array.isArray(frame.projection) || frame.projection.length !== 12 ||
         !frame.projection.every(Number.isFinite))) rejectMap();
     if (frame.center !== undefined && !finiteTriple(frame.center)) rejectMap();
+    if (frame.scanRefs !== undefined && (!Array.isArray(frame.scanRefs) || frame.scanRefs.length>100 ||
+        !frame.scanRefs.every(uint))) rejectMap();
     ids.add(frame.id); offset += frame.count;
   }
   if (offset !== index.points || !geometry || typeof geometry.frame !== 'string' ||

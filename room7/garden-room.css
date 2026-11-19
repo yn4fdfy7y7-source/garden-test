@@ -17,6 +17,10 @@ body:not(.room-mode) .room-only,
 .room-mode #video{object-fit:contain}
 .room-mode #roomLabels{position:absolute;inset:0;z-index:3;overflow:hidden;pointer-events:none}
 .room-mode #roomLabels .target-label{pointer-events:auto;transform:translate(-50%,-100%);transition:none;white-space:nowrap;max-width:94%;top:auto}
+.room-mode #roomLabels .target-label::after{left:var(--pointer-x,50%);transform:translateX(-50%);border-top-color:var(--accent)}
+.room-mode #viewer.field-camera #roomLabels .target-label::after{display:block}
+.room-mode #roomLabels .target-label[data-below="true"]{transform:translate(-50%,0)}
+.room-mode #roomLabels .target-label[data-below="true"]::after{top:-7px;bottom:auto;border-top:0;border-bottom:7px solid var(--accent)}
 .room-mode #cameraCandidates{bottom:8px;left:9px;right:auto;max-width:calc(100% - 18px);padding:7px 10px;z-index:4}
 .room-mode .field-camera #cameraCandidates{bottom:132px}
 .room-range{font-size:12px;display:flex;gap:6px;align-items:center}

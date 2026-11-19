@@ -34,7 +34,7 @@ export function clearLocalMap() {
 
 export async function useLocalMap(mapObject, onProgress) {
   clearLocalMap();
-  const instance = new Worker(new URL('./recognizer-worker.js?v=garden2', import.meta.url));
+  const instance = new Worker(new URL('./recognizer-worker.js?v=field3', import.meta.url));
   worker = instance;
   const handleFailure = error => { if (worker === instance) stopWorker(error); };
   worker.onerror = event => handleFailure(new Error(event.message || 'Не удалось загрузить распознавание'));
@@ -60,7 +60,11 @@ export async function initRecognizer() {
   return await startup;
 }
 
-export async function recognizeFrame(canvas) {
+export function resetTracking() {
+  worker?.postMessage({type:'reset'});
+}
+
+export async function recognizeFrame(canvas, {continuous=false} = {}) {
   if (busy) return { status: 'searching', anchors: [], diagnostics: { reason: 'busy', inliers: 0 } };
   busy = true;
   try {
@@ -77,7 +81,7 @@ export async function recognizeFrame(canvas) {
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(canvas, 0, 0, width, height);
     const { buffer } = ctx.getImageData(0, 0, width, height).data;
-    return await send('frame', { buffer, width, height }, [buffer]);
+    return await send('frame', { buffer, width, height, continuous }, [buffer]);
   } finally {
     busy = false;
   }

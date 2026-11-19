@@ -1,26 +1,32 @@
-import {createViewGuard} from './view-guard.js';
-import {useLocalMap, recognizeFrame} from './engine.js?v=garden2';
+import {createViewTracker} from './view-guard.js?v=field3';
+import * as roomEngine from './engine.js?v=field3';
 
 const viewer = document.getElementById('viewer');
 const labels = document.getElementById('roomLabels');
 const nearOnly = document.getElementById('roomRangeNear');
 const dialog = document.getElementById('roomCard');
-const guard = createViewGuard();
+const tracker = createViewTracker();
 const snapshot = document.createElement('canvas');
 const context = snapshot.getContext('2d', {willReadFrequently:true});
 const waiting = 'Наведите камеру на дверь «201» или на окна. Захватите часть стены вокруг ориентира.';
 let cards, pendingMap, retryAfter = 0;
 let activeVideo = null, epoch = 0, busy = false;
-let evidence = null, previousTime = -1, frameAdvanced = 0, nextScan = 0;
+let evidence = null, currentFrame = null, pendingPose = null;
+let videoFrameId = null, presentedFrames = 0, lastFrameKey = null;
+let frameAdvanced = 0, nextScan = 0;
+const maxFrameGap = 1000;
+const maxUncorrectedAge = 6500;
+const maxPoseAge = 15000;
 const visible = new Map();
+const obscured = new Map();
 
 async function loadMap() {
   if (!pendingMap) {
     pendingMap = (async () => {
-      const response = await fetch(new URL('./room7-map.json?v=garden2',import.meta.url));
+      const response = await fetch(new URL('./room7-map.json?v=field3',import.meta.url));
       if (!response.ok) throw new Error('Карта недоступна');
       const map = await response.json();
-      await useLocalMap(map);
+      await roomEngine.useLocalMap(map);
       cards = map.cards;
     })().catch(error => {
       pendingMap = null;
@@ -38,12 +44,29 @@ function clearEvidence() {
 }
 
 function resetSession(video) {
+  if (videoFrameId !== null) activeVideo?.cancelVideoFrameCallback?.(videoFrameId);
+  videoFrameId = null;
   epoch++;
+  roomEngine.resetTracking?.();
   clearEvidence();
+  pendingPose = null;
+  currentFrame = null;
+  obscured.clear();
+  lastFrameKey = null;
+  presentedFrames = 0;
   activeVideo = video;
-  previousTime = -1;
   nextScan = 0;
   frameAdvanced = performance.now();
+  if (video?.requestVideoFrameCallback) {
+    const ticket = epoch;
+    const delivered = (now, metadata) => {
+      if (ticket !== epoch) return;
+      presentedFrames = Number.isFinite(metadata.presentedFrames) ? metadata.presentedFrames : presentedFrames + 1;
+      frameAdvanced = now;
+      videoFrameId = video.requestVideoFrameCallback(delivered);
+    };
+    videoFrameId = video.requestVideoFrameCallback(delivered);
+  }
   if (video && window.innerWidth < 760 && !viewer.classList.contains('field-camera')) {
     const bounds = viewer.getBoundingClientRect();
     if (bounds.top > 0 && bounds.bottom > window.innerHeight-64) viewer.scrollIntoView({block:'start'});
@@ -58,23 +81,21 @@ function createLabel(anchor) {
   element.dataset.anchor = anchor.id;
   element.textContent = anchor.label;
   element.addEventListener('click', () => {
+    if (!activeVideo || !evidence || !isLive(activeVideo)) return;
+    refreshFrame(activeVideo, performance.now(), true);
     const current = visible.get(anchor.id);
-    if (!current || !activeVideo || !evidence) return;
-    if (!guard.align(evidence.stamp, guard.capture(activeVideo))) {
-      clearEvidence();
-      reportRoom(waiting, false);
-      return;
-    }
+    if (!current) return;
     document.getElementById('roomCardName').textContent = current.label;
     document.getElementById('roomCardText').textContent = cards[current.id] || '';
-    document.getElementById('roomCardDistance').textContent = '≈ ' + fmt(current.distanceM) + ' м';
+    document.getElementById('roomCardDistance').textContent = Number.isFinite(current.distanceM)
+      ? '≈ ' + fmt(current.distanceM) + ' м' : 'Не измерено';
     dialog.showModal();
   });
   labels.append(element);
   return element;
 }
 
-function renderLabels(video, shift) {
+function renderLabels(video) {
   const width = viewer.clientWidth, height = viewer.clientHeight;
   if (!width || !height || !video.videoWidth || !video.videoHeight) return;
   const scale = Math.min(width / video.videoWidth, height / video.videoHeight);
@@ -82,26 +103,176 @@ function renderLabels(video, shift) {
   const previous = new Map(Array.from(labels.children, button => [button.dataset.anchor,button]));
   visible.clear();
   for (const anchor of evidence.anchors) {
-    if (nearOnly.checked && anchor.distanceM > 1) continue;
-    const x = anchor.x + shift.dx, y = anchor.y + shift.dy;
+    if (nearOnly.checked && !(Number.isFinite(anchor.distanceM) && anchor.distanceM >= 0 && anchor.distanceM <= 1)) continue;
+    const {x, y} = anchor;
     if (x < 0 || x > 1 || y < 0 || y > 1) continue;
     const button = previous.get(anchor.id) || createLabel(anchor);
     previous.delete(anchor.id);
     const px = (width-vw)/2 + x*vw, py = (height-vh)/2 + y*vh;
-    const half = button.offsetWidth/2 + 2;
-    button.style.left = Math.min(Math.max(px, half), width-half) + 'px';
-    button.style.top = Math.min(height-5, Math.max(button.offsetHeight+5, py-3)) + 'px';
+    const half = button.offsetWidth/2;
+    const labelX = Math.min(Math.max(px,half+2),width-half-2);
+    const below = py < button.offsetHeight+8;
+    button.dataset.below = String(below);
+    button.style.left = labelX+'px';
+    button.style.top = (below ? py+7 : py-7)+'px';
+    button.style.setProperty('--pointer-x',(half+px-labelX)+'px');
     visible.set(anchor.id,anchor);
   }
   for (const button of previous.values()) button.remove();
   const message = visible.size ? 'Коснитесь подписи, чтобы открыть карточку.' :
+    nearOnly.checked && evidence.anchors.some(anchor => !Number.isFinite(anchor.distanceM))
+      ? 'Близость ориентира не подтверждена. Снимите ограничение «Только в пределах 1 м».' :
     nearOnly.checked && evidence.anchors.length ? 'Ориентиры дальше метра. Снимите ограничение или подойдите ближе.' :
     'Кабинет распознан. Чтобы увидеть подпись, повернитесь к двери или окнам.';
   reportRoom(message,true);
 }
 
+function moveAnchors(anchors, alignment) {
+  if (!alignment?.ok) return [];
+  const moved = [];
+  for (const anchor of anchors) {
+    const p = alignment.map(anchor.x, anchor.y);
+    if (p && p.x >= 0 && p.x <= 1 && p.y >= 0 && p.y <= 1) {
+      const a=anchor.a ?? 1, b=anchor.b ?? 0;
+      moved.push({...anchor, x:p.x, y:p.y,
+        a:alignment.a*a-alignment.b*b, b:alignment.b*a+alignment.a*b});
+    }
+  }
+  return moved;
+}
+
+function disconnectView() {
+  currentFrame = null;
+  if (pendingPose) pendingPose.steps = null;
+  obscured.clear();
+  clearEvidence();
+}
+
+function updateTracks(frame, previous, alignment) {
+  if (!alignment?.ok) {
+    obscured.clear();
+    clearEvidence();
+    reportRoom(waiting, false);
+    return;
+  }
+  const now = frame.time;
+  let moved = moveAnchors(evidence.anchors, alignment);
+  const measured = new Set(moved.map(anchor=>anchor.id));
+  for (const anchor of evidence.anchors) {
+    if (!measured.has(anchor.id) && alignment.inFrame(anchor.x,anchor.y)) {
+      // A global pose can still project this point behind a new foreground object.
+      // Remember its last unobstructed local appearance before a later solve arrives.
+      obscured.set(anchor.id,{frame:previous, anchor});
+    }
+  }
+  // Correct accumulated optical-flow drift against the original, localized image.
+  // Recovered anchors must match their own original neighborhood in the current frame.
+  if (now - evidence.lastCheck >= 750 && previous !== evidence.origin) {
+    const direct = tracker.compare(evidence.origin.stamp, frame.stamp);
+    const byId = new Map(moved.map(anchor => [anchor.id, anchor]));
+    if (direct?.ok) {
+      for (const anchor of moveAnchors(evidence.seeds, direct)) {
+        const prior = byId.get(anchor.id);
+        if (!prior || Math.hypot(anchor.x-prior.x, anchor.y-prior.y) < 0.04) {
+          byId.set(anchor.id, {...anchor, checkedAt:now});
+          obscured.delete(anchor.id);
+        } else {
+          byId.delete(anchor.id);
+        }
+      }
+    }
+    // A slow global solve may miss several times while the camera pans beyond the
+    // direct corner search. Verify the original patch at its tracked location.
+    for (const seed of evidence.seeds) {
+      const current=byId.get(seed.id);
+      if (current && tracker.confirmsPatch(evidence.origin.stamp,frame.stamp,seed,current)) current.checkedAt=now;
+    }
+    moved = [...byId.values()];
+    evidence.lastCheck = now;
+  }
+  moved = moved.filter(anchor=>now-anchor.checkedAt<=maxUncorrectedAge);
+  evidence.anchors = moved;
+  if (moved.length || (!evidence.seeds.length && now-evidence.origin.time<maxUncorrectedAge)) renderLabels(activeVideo);
+  else {
+    visible.clear();
+    labels.replaceChildren();
+    reportRoom(waiting, false);
+    if (now-evidence.origin.time>maxPoseAge) evidence=null;
+  }
+}
+
+function refreshFrame(video, now, force = false) {
+  if (video.readyState < 2 || !video.videoWidth) return null;
+  const frameKey = video.requestVideoFrameCallback ? presentedFrames : video.currentTime;
+  if (!video.requestVideoFrameCallback && frameKey !== lastFrameKey) frameAdvanced = now;
+  if (now - frameAdvanced > maxFrameGap) {
+    disconnectView();
+    reportRoom('Ожидаю новый кадр с камеры.',false);
+    return null;
+  }
+  if (!force && currentFrame && frameKey === lastFrameKey) return currentFrame;
+  const stamp = tracker.capture(video);
+  if (!stamp) return null;
+  const frame = {stamp, time:now};
+  const previous = currentFrame;
+  currentFrame = frame;
+  lastFrameKey = frameKey;
+  if (previous && (pendingPose?.steps || evidence)) {
+    const alignment = now - previous.time <= maxFrameGap && tracker.compare(previous.stamp, stamp);
+    if (pendingPose?.steps) {
+      if (alignment?.ok && now - pendingPose.origin.time <= maxPoseAge) {
+        pendingPose.steps.push(alignment);
+      } else {
+        pendingPose.steps = null;
+      }
+    }
+    if (evidence) updateTracks(frame, previous, alignment);
+  }
+  return frame;
+}
+
+function acceptPose(result, pose, frame) {
+  if (!frame || frame.time - pose.origin.time > maxPoseAge) return false;
+  const seeds = result.anchors.map(anchor => ({...anchor, checkedAt:pose.origin.time}));
+  let anchors = seeds;
+  if (frame !== pose.origin) {
+    // Prefer a direct match; during a long solve the camera can pan beyond its range.
+    const direct = tracker.compare(pose.origin.stamp, frame.stamp);
+    if (direct?.ok) {
+      anchors = moveAnchors(seeds, direct).map(anchor => ({...anchor, checkedAt:frame.time}));
+    } else {
+      if (!pose.steps) return false;
+      for (const step of pose.steps) {
+        anchors = moveAnchors(anchors, step);
+        if (!anchors.length) break;
+      }
+    }
+    if (seeds.length && !anchors.length) return false;
+  }
+  anchors = anchors.filter(anchor=>{
+    const veto=obscured.get(anchor.id);
+    if (!veto) return true;
+    const direct=tracker.compare(veto.frame.stamp,frame.stamp);
+    const p=direct.ok && direct.map(veto.anchor.x,veto.anchor.y);
+    const nearMatch=p && Math.hypot(p.x-anchor.x,p.y-anchor.y)<.04;
+    if (!nearMatch && !tracker.confirmsPatch(veto.frame.stamp,frame.stamp,veto.anchor,{x:anchor.x,y:anchor.y})) return false;
+    obscured.delete(anchor.id);
+    return true;
+  });
+  for (const anchor of anchors) {
+    const seed=seeds.find(item=>item.id===anchor.id);
+    if (tracker.confirmsPatch(pose.origin.stamp,frame.stamp,seed,anchor)) anchor.checkedAt=frame.time;
+  }
+  anchors=anchors.filter(anchor=>frame.time-anchor.checkedAt<=maxUncorrectedAge);
+  const allowed=new Set(anchors.map(anchor=>anchor.id));
+  evidence = {origin:pose.origin, seeds:seeds.filter(anchor=>allowed.has(anchor.id)), anchors, lastCheck:frame.time};
+  renderLabels(activeVideo);
+  return true;
+}
+
 async function scan(video, ticket) {
   busy = true;
+  let pose;
   try {
     if (!cards) {
       reportRoom('Загружается карта кабинета…',false);
@@ -116,65 +287,60 @@ async function scan(video, ticket) {
     context.imageSmoothingEnabled=true;
     context.imageSmoothingQuality='high';
     context.drawImage(video,0,0,w,h);
-    const stamp = guard.capture(video);
-    const result = await recognizeFrame(snapshot);
-    if (ticket !== epoch || video !== activeVideo || !roomSelected || document.hidden) return;
+    // Both draws run in this task and see the same video image. During the solve,
+    // each actually observed inter-frame alignment is recorded for these exact pixels.
+    const origin = refreshFrame(video, performance.now(), true);
+    if (!origin) return;
+    pose = {origin, steps:[]};
+    pendingPose = pose;
+    const result = await roomEngine.recognizeFrame(snapshot, {continuous:true});
+    if (ticket !== epoch || video !== activeVideo || !isLive(video)) return;
+    const frame = refreshFrame(video, performance.now(), true);
     window.roomDiagnostic = {
-      status: result.status,
-      reason: result.diagnostics?.reason || null,
-      matchedPoints: result.diagnostics?.inliers || 0,
-      durationMs: result.diagnostics?.durationMs,
-      visibleInFrame: result.anchors.length,
-      rangeLimitM: nearOnly.checked ? 1 : null,
-      frame: [video.videoWidth,video.videoHeight]
+      status:result.status, reason:result.diagnostics?.reason || null,
+      matchedPoints:result.diagnostics?.inliers || 0, durationMs:result.diagnostics?.durationMs,
+      visibleInFrame:result.anchors.length, rangeLimitM:nearOnly.checked ? 1 : null,
+      frame:[video.videoWidth,video.videoHeight], trackedAnchors:visible.size
     };
-    if (result.status !== 'accepted') {
-      clearEvidence();
-      reportRoom(waiting,false);
+    if (result.status === 'accepted' && acceptPose(result, pose, frame)) {
+      window.roomDiagnostic.trackedAnchors = visible.size;
       return;
     }
-    const shift = guard.align(stamp,guard.capture(video));
-    if (!shift) {
-      window.roomDiagnostic.reason = 'camera_moved';
-      clearEvidence();
-      reportRoom('Ракурс изменился. На секунду задержите камеру на двери или окнах.',false);
-      return;
-    }
-    evidence = {anchors:result.anchors,stamp,time:performance.now()};
-    renderLabels(video,shift);
+    // A missed global relocalization does not contradict a locally verified image track.
+    // A change of scene or loss of local support has already removed its label in refreshFrame.
+    if (!evidence?.anchors.length) reportRoom(waiting, false);
   } catch {
     if (ticket === epoch) {
-      clearEvidence();
+      disconnectView();
       reportRoom(cards ? 'Не удалось обработать кадр. Повторяю поиск.' : 'Не удалось загрузить карту кабинета. Повторяю загрузку.',false);
       retryAfter = performance.now()+3000;
     }
   } finally {
+    if (pendingPose === pose) pendingPose = null;
     busy = false;
     nextScan = performance.now()+120;
   }
 }
 
+function isLive(video) {
+  return roomSelected && tab==='camera' && !document.hidden && !dialog.open &&
+    cameraReady && stream && video.srcObject===stream && !video.paused;
+}
+
 function tick() {
   const video = document.getElementById('video');
-  const valid = roomSelected && tab==='camera' && !document.hidden && !dialog.open &&
-    cameraReady && stream && video.srcObject===stream && !video.paused;
-  if (!valid) {
+  if (!isLive(video)) {
     if (activeVideo) resetSession(null);
     return;
   }
   if (activeVideo !== video) resetSession(video);
   const now = performance.now();
-  if (previousTime !== video.currentTime) {previousTime=video.currentTime; frameAdvanced=now;}
-  if (video.readyState < 2 || now-frameAdvanced > 1800) {
-    clearEvidence();
+  if (video.readyState < 2) {
+    disconnectView();
     reportRoom('Ожидаю новый кадр с камеры.',false);
     return;
   }
-  if (evidence) {
-    const shift=now-evidence.time<5000 && guard.align(evidence.stamp,guard.capture(video));
-    if (shift) renderLabels(video,shift);
-    else {clearEvidence();reportRoom(waiting,false);}
-  }
+  if (!refreshFrame(video, now)) return;
   if (!busy && now>=nextScan && now>=retryAfter) void scan(video,epoch);
 }
 
@@ -187,5 +353,8 @@ dialog.addEventListener('click', event => {
 });
 document.addEventListener('visibilitychange',()=>{if(document.hidden)resetSession(null);});
 window.addEventListener('pagehide',()=>resetSession(null));
-nearOnly.addEventListener('change',tick);
-window.setInterval(tick,150);
+nearOnly.addEventListener('change',()=>{
+  tick();
+  if (activeVideo && evidence) renderLabels(activeVideo);
+});
+window.setInterval(tick,110);
