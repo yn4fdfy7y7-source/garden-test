@@ -23,7 +23,7 @@ const obscured = new Map();
 async function loadMap() {
   if (!pendingMap) {
     pendingMap = (async () => {
-      const response = await fetch(new URL('./room7-map.json?v=field3b',import.meta.url));
+      const response = await fetch(new URL('./room7-map.json?v=5',import.meta.url));
       if (!response.ok) throw new Error('Карта недоступна');
       const map = await response.json();
       await roomEngine.useLocalMap(map);
