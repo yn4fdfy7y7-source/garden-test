@@ -36,7 +36,9 @@ html.phone-layout .shell{display:block}html.phone-layout .sidebar{height:66px;po
 <main class="workspace"><div id="bootNotice" class="demo-warning" role="alert">Если кнопки не реагируют, откройте сайт в Safari или Chrome по HTTPS-ссылке. Предпросмотр HTML-файла может не запускать JavaScript.</div><header class="topbar"><div class="eyebrow">Прогулка начинается с любопытства</div><div class="mobile-brand"><svg class="icon"><use href="#i-leaf"/></svg>Сад рядом</div><div class="top-actions"><span class="badge"><span class="dot"></span>ПОЛЕВОЙ ТЕСТ · V0.12</span><button class="quiet" id="helpButton">Как проверить</button></div></header>
 <section id="cameraPage"><div class="sensor-start" style="background:#fffef9;border:1px solid #d8dfce;border-radius:16px;padding:18px;margin-bottom:20px">
 <button id="startSensors" style="background:#193f33;color:white;width:100%;padding:16px;border-radius:12px;font-size:15px;font-weight:600">Начать прогулку</button>
-<p class="room-only room-intro">В кабинете № 7 нажмите «Начать прогулку». Наведите камеру на окно, дверь или мебель кабинета. Коснитесь подписи, чтобы открыть карточку.</p><div class="camera-tools garden-sensors"><button class="text-button" id="retryGPS">Включить геопозицию</button><button class="text-button" id="retryOrientation">Включить компас</button></div>
+<p class="room-only room-intro">При включении камеры разрешите доступ к камере и датчикам движения. Наведите телефон на ориентир кабинета № 7 и коснитесь подписи.</p>
+<div class="room-only" id="roomSensorReading" style="font-size:12px;color:var(--muted)" hidden></div>
+<div class="camera-tools garden-sensors"><button class="text-button" id="retryGPS">Включить геопозицию</button><button class="text-button" id="retryOrientation">Включить компас</button></div>
 <p style="font-size:12px;line-height:1.6;color:#687660;margin:12px 0">Кнопка запускает запросы компаса, геопозиции и камеры. Если один из них не появился — нажмите его отдельную кнопку. При сохранённом разрешении или запрете нового окна может не быть. Видео и координаты остаются на телефоне.</p>
 <div aria-live="polite" style="font-size:12px;line-height:1.7"><div id="cameraStatus">Камера: ещё не включена.</div><div id="gpsStatusLine">Геолокация: ещё не запрашивалась.</div><div id="orientationStatus">Направление: ещё не запрашивалось.</div></div>
 <details class="diag"><summary>Safari не спрашивает разрешение</summary><p>Геопозиция: откройте меню страницы Safari → настройки веб-сайта → геопозиция. Разрешите доступ или выберите запрос. Также проверьте службы геолокации iPhone и доступ для веб-сайтов Safari. Затем повторите «Включить геопозицию».</p><p>Компас: нажмите «Включить компас» непосредственно на странице. Если Safari возвращает запрет, проверьте доступ к движению и ориентации в настройках Safari (если этот пункт есть в вашей версии). Перезагрузите страницу и повторите. Отсутствие показаний само по себе не означает запрет.</p></details><p style="font-size:11px;color:#687660;margin-bottom:0">При неточном GPS нажмите «Я у дерева — выбрать на плане», отметьте свой экземпляр и подтвердите выбор. Камера не распознаёт изображение; автоматический выбор пока недостоверен.</p></div><div class="viewer" id="viewer"><button id="closeField" class="field-close" hidden aria-label="Выйти из камеры на весь экран">×</button>
@@ -6153,7 +6155,10 @@ function gpsMessage(message){$('gpsStatusLine').textContent='Геолокаци�
 async function toggleCamera(){
  if(cameraEngine.stream||cameraEngine.pending){cameraEngine.stop();return}
  if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia){cameraMessage('нужна HTTPS-ссылка в Safari или Chrome.');return}
- await cameraEngine.start();
+ // Start all three permission requests within the same user gesture.
+ const camera=cameraEngine.start();
+ if(roomSelected){void startOrientation();void startRoomMotion()}
+ await camera;
  if(cameraReady&&!roomSelected&&!locationEngine.active)locationEngine.start();
 }
 function sensorMessage(t){$('sensorStatus').textContent=t;document.querySelector('.diag').open=true}
@@ -6209,9 +6214,56 @@ function onOrientation(e){
  clearTimeout(orientationWaitTimer);
  if(!sample.absolute&&sample.kind==='relative'&&orientationSample?.absolute&&Date.now()-orientationSample.time<2500)return;
  orientationSample={...sample,time:Date.now()};
- if(mode==='live'&&Date.now()-lastOrientationRender>100){lastOrientationRender=Date.now();renderState()}
+ if(mode==='live'&&Date.now()-lastOrientationRender>100){
+  lastOrientationRender=Date.now();
+  if(roomSelected)renderRoomSensors();else renderState()
+ }
 }
 let orientationPermission='not-requested',orientationError=null,orientationWaitTimer=null,orientationWaiting=false;
+let roomMotionPermission='not-requested',lastGyroSample=0;
+function onRoomMotion(event){
+ const rate=event.rotationRate;
+ if(rate&&[rate.alpha,rate.beta,rate.gamma].some(Number.isFinite))lastGyroSample=Date.now()
+}
+function roomSensorsActive(){return roomSelected&&!document.hidden&&(cameraPending||!!stream)}
+function syncRoomMotion(){
+ if(roomSensorsActive()&&['granted','not-required'].includes(roomMotionPermission)){
+  window.addEventListener('devicemotion',onRoomMotion);
+ }else{
+  window.removeEventListener('devicemotion',onRoomMotion);lastGyroSample=0;
+ }
+ renderRoomSensors()
+}
+async function startRoomMotion(){
+ if(!['granted','not-required','requesting'].includes(roomMotionPermission)){
+  const api=window.DeviceMotionEvent;
+  if(!api||sensorPolicy('gyroscope')===false)roomMotionPermission='unavailable';
+  else{
+   roomMotionPermission='requesting';
+   try{roomMotionPermission=typeof api.requestPermission==='function'?await api.requestPermission():'not-required'}
+   catch(error){roomMotionPermission=error.name==='NotAllowedError'?'denied':'unavailable'}
+  }
+ }
+ syncRoomMotion()
+}
+function renderRoomSensors(){
+ const line=$('roomSensorReading');
+ line.hidden=!roomSensorsActive();
+ if(line.hidden)return;
+ const stateText=state=>({
+  'granted':'ожидаем показания','not-required':'ожидаем показания','not-requested':'ожидание',
+  'requesting':'запрос доступа','denied':'доступ запрещён'
+ }[state]||'недоступен');
+ const sample=orientationSample;
+ let compass=stateText(orientationPermission);
+ if(sample&&Date.now()-sample.time<2500){
+  if(sample.absolute&&Number.isFinite(sample.bearing))compass=Math.round(sample.bearing)%360+'°';
+  else compass=sample.absolute?'поднимите телефон':'только относительное направление';
+ }
+ const gyro=Date.now()-lastGyroSample<2500?'есть показания':stateText(roomMotionPermission);
+ const message='Компас: '+compass+' · Гироскоп: '+gyro;
+ if(line.textContent!==message)line.textContent=message
+}
 function sensorPolicy(name){
  try{const policy=document.permissionsPolicy||document.featurePolicy;
   if(!policy||typeof policy.allowsFeature!=='function')return null;
@@ -6222,7 +6274,7 @@ function sensorPolicy(name){
 function orientationMessage(message){$('orientationStatus').textContent='Компас: '+message;renderState()}
 function orientationAllowed(){return orientationPermission==='granted'||orientationPermission==='not-required'}
 function resumeOrientation(){
- if(document.hidden||!orientationAllowed())return;
+ if(document.hidden||!orientationAllowed()||(roomSelected&&!roomSensorsActive()))return;
  window.removeEventListener('deviceorientation',onOrientation);window.removeEventListener('deviceorientationabsolute',onOrientation);
  window.addEventListener('deviceorientation',onOrientation);window.addEventListener('deviceorientationabsolute',onOrientation);
  if(!orientationSample)orientationMessage('доступ разрешён, ожидаем новые показания. Повторное разрешение не требуется.');
@@ -6243,6 +6295,7 @@ async function startOrientation(force=false){
   orientationPermission=permission;
   if(document.hidden||requestEpoch!==orientationRequestEpoch)return;
   if(permission!=='granted'&&permission!=='not-required'){orientationMessage('доступ не разрешён. Если окно не появилось, проверьте сохранённые разрешения Safari. Сайт не может сбросить запрет.');return}
+  if(roomSelected&&!roomSensorsActive())return;
   window.addEventListener('deviceorientation',onOrientation);window.addEventListener('deviceorientationabsolute',onOrientation);
   orientationMessage('ожидаем показания датчика. Держите телефон вертикально.');
   orientationWaitTimer=setTimeout(()=>{
@@ -6257,6 +6310,7 @@ async function startOrientation(force=false){
 }
 function setMode(next){
  roomSelected=next==='room';
+ syncRoomMotion();
  document.body.classList.toggle('room-mode',roomSelected);
  $('roomMode').setAttribute('aria-pressed',String(roomSelected));
  if(roomSelected)next='live';
@@ -6285,6 +6339,7 @@ function renderState(){
  if(typeof renderFieldHUD==='function')renderFieldHUD();
 }
 function renderRoomState(){
+ renderRoomSensors();
  $('sceneMode').textContent='КАБИНЕТ № 7';
  $('mapSelectedName').textContent=mapPickedTree?'Выбрано на плане: '+mapPickedTree.name:'Нажмите точку дерева, чтобы выбрать его на плане сада';
  $('mapDistance').textContent='Показан план сада. Камера кабинета работает по отдельной карте.';
@@ -6432,6 +6487,11 @@ const cameraEngine=new CameraController({
  video:$('video'),getMedia:constraints=>navigator.mediaDevices.getUserMedia(constraints),isHidden:()=>document.hidden,
  onState:s=>{
   stream=s.stream;cameraPending=s.pending;cameraReady=s.ready;
+  syncRoomMotion();
+  if(roomSelected&&!roomSensorsActive()){
+   window.removeEventListener('deviceorientation',onOrientation);window.removeEventListener('deviceorientationabsolute',onOrientation);
+   orientationSample=null;clearTimeout(orientationWaitTimer)
+  }
   $('demoScene').hidden=true;$('cameraButton').disabled=false;
   const cameraAction=cameraPending?'Отменить запрос камеры':stream?'Выключить камеру телефона':'Включить камеру телефона';
   $('cameraButton').setAttribute('aria-label',cameraAction);$('cameraButton').setAttribute('title',cameraAction);
