@@ -34,7 +34,7 @@ export function clearLocalMap() {
 
 export async function useLocalMap(mapObject, onProgress) {
   clearLocalMap();
-  const instance = new Worker(new URL('./recognizer-worker.js', import.meta.url));
+  const instance = new Worker(new URL('./recognizer-worker.js?v=garden2', import.meta.url));
   worker = instance;
   const handleFailure = error => { if (worker === instance) stopWorker(error); };
   worker.onerror = event => handleFailure(new Error(event.message || 'Не удалось загрузить распознавание'));

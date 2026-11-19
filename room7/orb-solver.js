@@ -186,6 +186,86 @@ function separation(a,b) {
   return [dp,Math.acos(Math.max(-1,Math.min(1,(traced-1)/2)))];
 }
 
+// Profile reprojection error across focal lengths using fixed correspondences.
+// Pose and focal length are coupled, particularly on nearly planar walls.
+function refineCalibration(cv, candidate, xyz, scene, groups) {
+  let best=candidate;
+  const edge=Math.max(scene.w,scene.h);
+  for(let iteration=0;iteration<2;iteration++){
+    const {pose,stats}=best;
+    const pairs=stats.pairs;
+    const residual=(p)=>{
+      let score=0;
+      const R=p.R,t=p.t,cx=(scene.w-1)/2,cy=(scene.h-1)/2;
+      for(const {p:k,q} of pairs){
+        const x=xyz[3*k],y=xyz[3*k+1],z=xyz[3*k+2],depth=R[6]*x+R[7]*y+R[8]*z+t[2];
+        const uv=scene.xy[q];
+        const dx=cx+p.f*(R[0]*x+R[1]*y+R[2]*z+t[0])/depth-uv.x;
+        const dy=cy+p.f*(R[3]*x+R[4]*y+R[5]*z+t[1])/depth-uv.y;
+        const d=Math.hypot(dx,dy);score+=d<2?d*d:4*d-4;
+      }
+      return score;
+    };
+    let point=pose, loss=residual(pose);
+    for(const step of [.16,.07,.03,.012]) {
+      const middle=point;
+      for(const factor of [1-step,1,1+step]) {
+        const f=middle.f*factor;
+        if(f<.28*edge||f>1.85*edge)continue;
+        const trial=solvePose(cv,pairs,xyz,scene,f,true,middle);
+        if(!trial)continue;
+        const cost=residual(trial);
+        if(cost<loss){loss=cost;point=trial;}
+      }
+    }
+    const refined=support(point,groups,xyz,scene);
+    if(!refined||refined.inliers<.93*best.stats.inliers)break;
+    best={pose:point,stats:refined,referenceId:candidate.referenceId};
+  }
+  return best;
+}
+
+// Independent image-to-image homographies reject repeated corners before the 3D fit.
+// They seed candidate poses; all original matches remain available for verification.
+function verifyReferences(cv, all, projected, scene) {
+  const groups = [];
+  for (const g of all) {
+    if (g.matches.length < 10) continue;
+    const queryPixels=[], referencePixels=[];
+    for(const {q,p} of g.matches){
+      queryPixels.push(scene.xy[q].x,scene.xy[q].y);
+      referencePixels.push(projected[2*p],projected[2*p+1]);
+    }
+    const src=cv.matFromArray(g.matches.length,1,cv.CV_32FC2,queryPixels);
+    const dst=cv.matFromArray(g.matches.length,1,cv.CV_32FC2,referencePixels);
+    const mask=new cv.Mat();
+    let H;
+    try {
+      H=cv.findHomography(src,dst,cv.RANSAC,4,mask,220,.995);
+      if(H.empty())continue;
+      const flags=mask.data;
+      const matches=g.matches.filter((m,i)=>flags[i]);
+      if(matches.length<7)continue;
+      const hull=hullCoverage(matches.map(m=>scene.xy[m.q]),scene.w,scene.h);
+      groups.push({id:g.id,matches,rank:matches.length*Math.min(1,hull/.12)});
+    } finally {src.delete();dst.delete();mask.delete();H?.delete();}
+  }
+  return groups.sort((a,b)=>b.rank-a.rank);
+}
+function sourcePixels(frames,xyz) {
+  const uv=new Float32Array(xyz.length/3*2);
+  for(const frame of frames) {
+    const P=frame.projection;
+    if(!P || P.length!==12)return null;
+    for(let i=frame.offset;i<frame.offset+frame.count;i++){
+      const j=i*3,x=xyz[j],y=xyz[j+1],z=xyz[j+2],d=P[8]*x+P[9]*y+P[10]*z+P[11];
+      uv[i*2]=(P[0]*x+P[1]*y+P[2]*z+P[3])/d;
+      uv[i*2+1]=(P[4]*x+P[5]*y+P[6]*z+P[7])/d;
+    }
+  }
+  return uv;
+}
+
 export async function createOrbSolver(cv, suppliedMap) {
   if (!suppliedMap?.index || !(suppliedMap.bytes instanceof ArrayBuffer)) {
     throw new Error('Не удалось прочитать карту кабинета.');
@@ -199,6 +279,18 @@ export async function createOrbSolver(cv, suppliedMap) {
   if (bytes.byteLength!==index.points*44) throw new Error('Неполная карта ориентиров.');
   const xyz=new Float32Array(bytes,0,index.points*3);
   new Uint8Array(instance.exports.memory.buffer,0,descBytes).set(new Uint8Array(bytes,index.points*12,descBytes));
+  const projected=sourcePixels(index.frames, xyz);
+  // Source camera baselines distinguish different views even during a quick turn.
+  const cameras=new Map(index.frames.map(frame=>[frame.id,frame]));
+  function independentViews(a,b){
+    if (a===b) return false;
+    const x=cameras.get(a), y=cameras.get(b);
+    if(!x?.center || !y?.center || !x.projection || !y.projection) return Math.abs(a-b)>=6;
+    const displacement=Math.hypot(...x.center.map((v,i)=>v-y.center[i]));
+    const cosine=x.projection.slice(8,11).reduce((sum,v,i)=>sum+v*y.projection[i+8],0);
+    return displacement>=.20 || cosine<Math.cos(Math.PI*25/180) ||
+      (displacement>=.10 && cosine<Math.cos(Math.PI*10/180));
+  }
   const detector=new cv.ORB();
   detector.setMaxFeatures(MAX_FEATURES);
   detector.setFastThreshold(12);
@@ -207,12 +299,15 @@ export async function createOrbSolver(cv, suppliedMap) {
     const scene=extractFeatures(cv,detector,rgba,width,height);
     if (scene.xy.length<25) return notFound('too_few_features');
     const all=matchReferences(instance,index.frames,descBytes,scene);
+    const guided=projected?verifyReferences(cv,all,projected,scene):[];
     const viable=[];
     const edge=Math.max(scene.w,scene.h);
-    for (const reference of all.slice(0,10)) {
-      if(reference.matches.length<12) break;
-      for(const ratio of FOCAL_RATIOS) {
-        const pose=solvePose(cv,reference.matches,xyz,scene,ratio*edge);
+    const focalRatios = Math.min(scene.w,scene.h)/edge < .8 ? [...FOCAL_RATIOS,1.2,1.48] : FOCAL_RATIOS;
+    const initialReferences=guided.slice(0,12).concat(all.slice(0,projected ? 7 : 10));
+    for (const reference of initialReferences) {
+      if(reference.matches.length<8) continue;
+      for(const ratio of focalRatios) {
+        const pose=solvePose(cv,reference.matches,xyz,scene,ratio*edge,false,null,reference.rank?140:300);
         if(!pose) continue;
         const stats=support(pose,all,xyz,scene);
         if(stats) viable.push({pose,stats,referenceId:reference.id});
@@ -221,31 +316,47 @@ export async function createOrbSolver(cv, suppliedMap) {
     if (!viable.length) return notFound('insufficient_spatial_support');
     const compare=(a,b)=>b.stats.inliers-a.stats.inliers || a.stats.medianError-b.stats.medianError;
     viable.sort(compare);
-    let best=viable[0];
-    // Refine position, orientation and focal length around the winning calibration hypothesis.
-    for(const step of [.09,.03]) {
-      const base=best;
-      for(const factor of [1-step,1,1+step]) {
-        const p=solvePose(cv,base.stats.pairs,xyz,scene,base.pose.f*factor,true,base.pose);
-        if(!p) continue;
-        const stats=support(p,all,xyz,scene);
-        if(stats && compare({pose:p,stats},best)<0) best={pose:p,stats,referenceId:base.referenceId};
+    const best=refineCalibration(cv,viable[0],xyz,scene,all);
+    function verifyPose(target){
+      const compatible=(other)=>{
+        const [distance,angle]=separation(target.pose,other);
+        return distance<=.22 && angle<=Math.PI/36;
+      };
+      const confirmers=new Set(viable.filter(other=>other.stats.inliers>=.55*target.stats.inliers &&
+        Math.abs(other.pose.f-target.pose.f)<.1*target.pose.f && compatible(other.pose)).map(other=>other.referenceId));
+      const knownIndependent=()=>{
+        for (const a of confirmers) {
+          for (const b of confirmers) if (independentViews(a,b)) return true;
+        }
+        return false;
+      };
+      if(knownIndependent())return true;
+      for(const group of guided.slice(0,16)){
+        if(group.matches.length<9||confirmers.has(group.id))continue;
+        const fit=solvePose(cv,group.matches,xyz,scene,target.pose.f,false,null,350);
+        if(!fit||!compatible(fit))continue;
+        const stats=support(fit,all,xyz,scene);
+        if(!stats || stats.inliers<.55*target.stats.inliers)continue;
+        confirmers.add(group.id);
+        if(knownIndependent())return true;
       }
+      return false;
     }
+    let corroborated=verifyPose(best);
+    // Compare distinct camera hypotheses after profiling their own focal lengths.
+    const checked=[];
     for (const other of viable) {
       if (other.stats.inliers<.82*best.stats.inliers) break;
       const [dist,angle]=separation(best.pose,other.pose);
-      if(dist>.4 || angle>.16) return notFound('competing_poses',best.stats.inliers);
+      if(dist<=.4 && angle<=.16)continue;
+      if(checked.some(x=>{const [d,a]=separation(x,other.pose);return d<=.22&&a<=Math.PI/36;}))continue;
+      checked.push(other.pose);
+      const alternative=refineCalibration(cv,other,xyz,scene,all);
+      const [d,a]=separation(best.pose,alternative.pose);
+      if ((d>.4 || a>.16) && alternative.stats.inliers>=.82*best.stats.inliers && verifyPose(alternative)) return notFound('competing_poses',best.stats.inliers);
     }
-    // Require two independently fitted PnP hypotheses before exposing a pose. Neighboring
-    // frames can repeat the same local appearance, so separate them in the scan sequence.
-    let corroborated = viable.some(other => {
-      if (Math.abs(other.referenceId-best.referenceId)<6 || other.stats.inliers < .55*best.stats.inliers) return false;
-      const [dist, angle] = separation(best.pose, other.pose);
-      return dist <= .22 && angle <= Math.PI/36;
-    });
     if (!corroborated) {
-      const independentlyMatched=multiviewPairs(all,xyz,best.referenceId);
+      const independentlyMatched=multiviewPairs(guided.length ? guided : all,xyz,best.referenceId);
       if (independentlyMatched.length>=20) {
         // The validating fit excludes the winning scan view and nearby reference frames.
         // Its 3D points require independent support from two other scan views.
@@ -261,8 +372,8 @@ export async function createOrbSolver(cv, suppliedMap) {
     if (!corroborated) {
       // Descriptors from repeated features can push a useful view down the initial list.
       // Search further views using the first fit's calibration but no prior on its pose.
-      for (const reference of all.slice(10,32)) {
-        if (reference.matches.length<12 || Math.abs(reference.id-best.referenceId)<6) continue;
+      for (const reference of [...guided.slice(0,18),...all.slice(7,28)]) {
+        if (reference.matches.length<8 || Math.abs(reference.id-best.referenceId)<6) continue;
         const independent=solvePose(cv,reference.matches,xyz,scene,best.pose.f,false,null,800);
         if (!independent) continue;
         const [distance,angle]=separation(best.pose,independent);
@@ -274,7 +385,7 @@ export async function createOrbSolver(cv, suppliedMap) {
     if (!corroborated) return notFound('independent_views_disagree',best.stats.inliers);
     const {pose,stats}=best;
     return {status:'accepted',R:pose.R,t:pose.t,focalPx:pose.f/scene.scale,inliers:stats.inliers,
-      diagnostics:{method:'ORB/PnP',inliers:stats.inliers,cells:stats.cells,coverage:stats.hull,references:stats.references,medianErrorPx:stats.medianError}};
+      diagnostics:{method:'ORB/PnP',inliers:stats.inliers,cells:stats.cells,coverage:stats.hull,references:stats.references,medianErrorPx:stats.medianError,focalRatio:pose.f/edge}};
   };
   solve.dispose = ()=>detector.delete();
   return solve;

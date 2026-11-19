@@ -22,6 +22,9 @@ export function unpackLocalMap(packet) {
   const ids = new Set();
   for (const frame of index.frames) {
     if (!frame || !uint(frame.id) || ids.has(frame.id) || frame.offset !== offset || !uint(frame.count)) rejectMap();
+    if (frame.projection !== undefined && (!Array.isArray(frame.projection) || frame.projection.length !== 12 ||
+        !frame.projection.every(Number.isFinite))) rejectMap();
+    if (frame.center !== undefined && !finiteTriple(frame.center)) rejectMap();
     ids.add(frame.id); offset += frame.count;
   }
   if (offset !== index.points || !geometry || typeof geometry.frame !== 'string' ||

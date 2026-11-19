@@ -5,7 +5,7 @@ let project;
 
 async function installMap(packet) {
   self.postMessage({ type:'progress', message:'Проверяем карту кабинета' });
-  const {unpackLocalMap}=await import('./read-map.js');
+  const {unpackLocalMap}=await import('./read-map.js?v=garden2');
   const parsed=unpackLocalMap(packet);
   self.postMessage({ type:'progress', message:'Загружаем модуль распознавания' });
   if (!self.cv) importScripts('vendor/opencv.js');
@@ -15,7 +15,7 @@ async function installMap(packet) {
       self.cv.then(()=>resolve());
     });
   }
-  const [{createOrbSolver},{projectRoomAnchors}]=await Promise.all([import('./orb-solver.js'),import('./scan-geometry.js')]);
+  const [{createOrbSolver},{projectRoomAnchors}]=await Promise.all([import('./orb-solver.js?v=garden2'),import('./scan-geometry.js')]);
   solve=await createOrbSolver(self.cv, parsed.solverData);
   room=parsed.room;project=projectRoomAnchors;
   return {frame:room.frame, observations:parsed.solverData.index.points,

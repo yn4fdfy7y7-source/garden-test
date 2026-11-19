@@ -1,0 +1,29 @@
+/* Cabinet field test in the Garden Visitor camera. */
+body:not(.room-mode) .room-only,
+.room-mode .sensor-start > .garden-sensors,
+.room-mode .sensor-start > :is(p:not(.room-intro),details),
+.room-mode :is(#gpsStatusLine,#orientationStatus,#correctionStatus,#correctionStatus + details,#fieldOrient),
+.room-mode #cameraCandidates .camera-sensor-actions,
+.room-mode #cameraPage .view-bottom,
+.room-mode #cameraPage #chooseTreeOnMap,
+.room-mode #cameraPage .heading .count,
+.room-mode #cameraPage .heading p,
+.room-mode #cameraPage .demo-warning:not(#bootNotice) {display:none}
+.room-mode .room-intro{font-size:13px;color:var(--muted);line-height:1.5;margin:12px 0 6px}
+.room-mode .sensor-start{min-height:0}
+.room-mode .sensor-start [aria-live]{height:auto;min-height:1.7em}
+.room-mode #viewer{scroll-margin-top:8px}
+.room-mode #roomMode[aria-pressed="true"]{background:#e0ebca}
+.room-mode #video{object-fit:contain}
+.room-mode #roomLabels{position:absolute;inset:0;z-index:3;overflow:hidden;pointer-events:none}
+.room-mode #roomLabels .target-label{pointer-events:auto;transform:translate(-50%,-100%);transition:none;white-space:nowrap;max-width:94%;top:auto}
+.room-mode #cameraCandidates{bottom:8px;left:9px;right:auto;max-width:calc(100% - 18px);padding:7px 10px;z-index:4}
+.room-mode .field-camera #cameraCandidates{bottom:132px}
+.room-range{font-size:12px;display:flex;gap:6px;align-items:center}
+.room-range input{width:auto;margin:0}
+.room-mode #roomLabels .target-label:focus-visible{outline:3px solid white}
+.room-mode #viewer .viewer-top{z-index:4;pointer-events:none}
+.room-mode #viewer .viewer-top button{pointer-events:auto}
+.room-mode #viewer .field-hud,.room-mode #viewer .field-close{z-index:5}
+.room-mode .garden-only{display:none}
+.room-mode #gpsButton{display:none}
