@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f4f4ec">
+<title>Кабинет № 7 — Ориентир</title>
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="brand"><span class="mark" aria-hidden="true"><i></i></span>Ориентир</div>
+  <button class="help-button" type="button" id="open-help"><span aria-hidden="true">?</span>Как пользоваться</button>
+</header>
+<main>
+  <section id="home" class="home">
+    <div class="intro">
+      <h1 id="place-title">Кабинет <span>№ 7</span></h1>
+      <p class="intro-copy" id="place-hint">Наведите камеру на дверь или окно в кабинете. Коснитесь подписи, чтобы открыть карточку.</p>
+      <div class="actions" id="scan-actions">
+        <button type="button" class="primary" id="start-camera"><i class="camera-icon" aria-hidden="true"></i>Включить камеру</button>
+        <label for="image-input" id="pick-file" class="secondary"><i class="photo-icon" aria-hidden="true"></i>Проверить по фото</label>
+      </div>
+      <p class="privacy-note">Кадры камеры и выбранный снимок обрабатываются на вашем устройстве.</p>
+      <p id="map-status" class="map-status" role="status">Загружаю карту кабинета…</p>
+      <button type="button" class="text-button" id="retry-map" hidden>Повторить загрузку</button>
+    </div>
+    <div class="blueprint optical" aria-hidden="true">
+      <div class="optical-focus"><i></i><i></i><i></i><i></i></div>
+      <div class="optical-lens"><i></i></div>
+      <span class="optical-axis"></span>
+    </div>
+  </section>
+
+  <section id="session" class="session" data-state="idle" data-processed="false" hidden aria-labelledby="session-title">
+    <div class="session-heading">
+      <div><p class="section-caption place-name">Кабинет № 7</p><h1 id="session-title">Камера</h1></div>
+      <button type="button" class="text-button" id="stop-session">Завершить</button>
+    </div>
+    <div class="viewer" id="viewer">
+      <div id="frame" class="frame">
+        <video playsinline autoplay muted id="live-view" hidden aria-label="Изображение с камеры"></video>
+        <canvas id="photo-view" hidden aria-label="Выбранная фотография"></canvas>
+        <canvas id="leaders" class="overlay" aria-hidden="true"></canvas>
+        <div id="anchor-layer" class="overlay"></div>
+      </div>
+      <span class="frame-corner corner-tl" aria-hidden="true"></span><span class="frame-corner corner-tr" aria-hidden="true"></span><span class="frame-corner corner-bl" aria-hidden="true"></span><span class="frame-corner corner-br" aria-hidden="true"></span>
+    </div>
+    <div class="status-row">
+      <div class="status-copy"><span class="status-dot" aria-hidden="true"></span><p id="scan-status" role="status">Подготовка камеры…</p></div>
+      <button type="button" class="text-button" id="retry" hidden>Повторить</button>
+      <label for="image-input" class="text-button" id="swap-file" hidden>Другое фото</label>
+    </div>
+  </section>
+
+  <div class="settings" id="settings">
+    <div><h2>Дальность подписей</h2><p id="range-description">До одного метра от камеры до точки подписи.</p></div>
+    <div class="switch" role="group" aria-label="Дальность подписей"><button type="button" id="range-near" aria-pressed="true">До 1 м</button><button type="button" id="range-room" aria-pressed="false">Без ограничения</button></div>
+  </div>
+  <input type="file" accept="image/*" id="image-input" class="file-input" aria-label="Выбрать фотографию помещения">
+  <noscript><p>Для камеры и распознавания включите JavaScript в настройках браузера.</p></noscript>
+</main>
+<dialog id="detail-dialog" aria-labelledby="detail-title">
+  <div class="dialog-bar"><span class="place-name">Кабинет № 7</span><button type="button" class="close-dialog" aria-label="Закрыть карточку">×</button></div>
+  <div class="dialog-body"><h2 id="detail-title"></h2><p id="detail-copy"></p><p id="detail-distance" class="distance-note"></p></div>
+</dialog>
+<dialog id="help-dialog" aria-labelledby="help-title">
+  <div class="dialog-bar"><span>Ориентир</span><button type="button" class="close-dialog" aria-label="Закрыть справку">×</button></div>
+  <div class="dialog-body"><h2 id="help-title">Как пользоваться</h2>
+    <ol class="help-list"><li>Откройте сайт в кабинете № 7, включите камеру и разрешите доступ.</li><li>Покажите участок помещения с узнаваемыми деталями. Задержите телефон на месте, пока сайт определяет ракурс.</li><li>Коснитесь подписи для просмотра карточки. Чтобы проверить ориентиры издалека, выберите «Без ограничения».</li></ol>
+    <p>Кнопка «Проверить по фото» позволяет выбрать один снимок помещения из галереи.</p>
+  </div>
+</dialog>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
