@@ -1,5 +1,5 @@
 const $ = id => document.getElementById(id);
-const video = $('live-view');
+let video = $('live-view');
 const still = $('photo-view');
 const frame = $('frame');
 const session = $('session');
@@ -212,6 +212,27 @@ function stopCameraTracks() {
   video.load();
 }
 
+function attachCamera(media,token) {
+  // A fresh element lets WebKit negotiate the new track's dimensions on restart.
+  const next=video.cloneNode(false);
+  const active=()=>isCurrent(token) && video===next && stream===media;
+  next.addEventListener('error',()=>{
+    if(active()) fail('Видеопоток прервался. Нажмите «Повторить».',enterCamera);
+  });
+  next.addEventListener('waiting',()=>{
+    if(active() && lastResult) invalidateView();
+  });
+  next.addEventListener('resize',()=>{
+    if(active() && next.videoWidth) setGeometry(next.videoWidth,next.videoHeight);
+  });
+  next.hidden=false;
+  next.muted=true;
+  video.replaceWith(next);
+  video=next;
+  next.srcObject=media;
+  return next;
+}
+
 function reset() {
   epoch++;
   clearTimeout(timer);clearInterval(guardTimer);
@@ -265,17 +286,17 @@ async function enterCamera() {
     // Use the track's requested geometry until resize/metadata supplies the real one.
     const settings=track.getSettings?.() || {};
     setGeometry(settings.width>0?settings.width:1280,settings.height>0?settings.height:960);
-    video.hidden=false;video.srcObject=media;
+    const player=attachCamera(media,token);
     status('loading','Открываю видеопоток…');
     let playbackDeadline;
     try {
       await Promise.race([
-        video.play(),
+        player.play(),
         new Promise((_,reject)=>{playbackDeadline=setTimeout(()=>reject(new Error('Playback timeout')),12000);})
       ]);
     } finally {clearTimeout(playbackDeadline);}
-    if (!isCurrent(token)) return;
-  } catch(error) {if(isCurrent(token)) fail(cameraError(error),enterCamera);return;}
+    if (!isCurrent(token) || stream!==media) return;
+  } catch(error) {if(isCurrent(token) && session.dataset.state!=='error') fail(cameraError(error),enterCamera);return;}
   if(video.videoWidth) setGeometry(video.videoWidth,video.videoHeight);
   status('loading','Подготавливаю распознавание…');
   try {await engine();} catch {if(isCurrent(token)) fail('Не удалось загрузить модуль распознавания. Проверьте соединение и повторите.',enterCamera);return;}
@@ -353,9 +374,6 @@ for (const dialog of document.querySelectorAll('dialog')) {
   dialog.querySelector('.close-dialog').addEventListener('click',()=>closeDialog(dialog));
   dialog.addEventListener('click',e=>{if(e.target===dialog) closeDialog(dialog);});
 }
-video.addEventListener('error',()=>{if(source==='camera' && stream) fail('Видеопоток прервался. Нажмите «Повторить».',enterCamera);});
-video.addEventListener('waiting',()=>{if(source==='camera' && stream && lastResult) invalidateView();});
-video.addEventListener('resize',()=>{if(source==='camera' && video.videoWidth) setGeometry(video.videoWidth,video.videoHeight);});
 function pauseCamera() {
   if (source!=='camera' || session.dataset.state==='error') return;
   epoch++;fail('Камера приостановлена. Нажмите «Повторить», чтобы продолжить.',enterCamera);
