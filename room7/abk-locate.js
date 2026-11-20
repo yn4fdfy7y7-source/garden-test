@@ -160,7 +160,7 @@ export function createPlanPicker(container, {floor: initialFloor = '1', roomId =
     } else if (origin) {
       const names = visibleTrees.map(tree => tree.name).join(', ');
       step = aim
-        ? room.name + ' · ' + names + '. Место и ориентир выбраны. Нажмите «Включить камеру».'
+        ? room.name + ' · ' + names + '. Место и ориентир отмечены. Направьте телефон на выбранный ориентир.'
         : '2. ' + room.name + ' · ' + names + '. Отметьте стену, угол или дверной проём, который видите.';
     }
     status.textContent = message || (loaded ? step : 'Загружаем планы этажей…');
@@ -197,11 +197,6 @@ export function createPlanPicker(container, {floor: initialFloor = '1', roomId =
     if (Math.hypot(wall.x - origin.x, wall.y - origin.y) < 1000 - 1e-6) { update('Выберите ориентир не ближе одного метра от вашего места.'); return; }
     if (!unobstructedRoomLine(origin, wall, room.poly)) { update('Между точками есть стена. Выберите ориентир, который видно с вашего места.'); return; }
     aim = {x:wall.x, y:wall.y}; cursor = {...aim}; update();
-    // On the phone the bottom tab bar can cover the newly enabled camera button.
-    if (window.matchMedia('(max-width: 760px)').matches) {
-      const start = container.closest('#abkSetupPanel')?.querySelector('#abkStartCamera:enabled');
-      start?.scrollIntoView({block:'nearest', inline:'nearest'});
-    }
   }
 
   for (const button of panel.querySelectorAll('.abkl-floor')) button.onclick = () => showFloor(button.dataset.floor);

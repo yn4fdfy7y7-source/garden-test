@@ -1,4 +1,4 @@
-import { createPlanPicker } from './abk-locate.js?v=aim2';
+import { createPlanPicker } from './abk-locate.js?v=start3';
 import { readPlanOrientationSample, rearCameraOrientation, calibratePlanYaw, projectPlanPoint } from './abk-direction.js?v=aim2';
 
 const el = id => document.getElementById(id);
@@ -23,7 +23,7 @@ function cameraAvailable() {
   return window.isSecureContext && !!navigator.mediaDevices?.getUserMedia;
 }
 function updateSetup() {
-  start.disabled = !!session || !cameraAvailable() || (method === 'plan' && !picker?.getSelection());
+  start.disabled = !!session || !cameraAvailable();
   if (!cameraAvailable()) say(el('abkSetupStatus'), 'Для камеры откройте HTTPS-ссылку в Safari или Chrome.');
 }
 function removeLabels() {
@@ -141,13 +141,18 @@ function sensorInfo(s) {
   const orientation = rearCameraOrientation(s.angles,screenAngle());
   const age = s.angles ? Math.floor((performance.now()-s.orientationAt)/1000) : null;
   const source = {relative:'датчик поворота',absolute:'абсолютная ориентация',compass:'компас'};
-  const sensor = !s.sensorAllowed ? 'ожидаем разрешение' : !s.angles ? 'ожидаем показания' :
-    source[s.angles.source]+' · '+(age<2?'сигнал получен':age+' с с последнего сигнала');
+  const sensor = s.sensorError || (!s.sensorAllowed ? 'ожидаем разрешение' : !s.angles ? 'ожидаем показания' :
+    source[s.angles.source]+' · '+(age<2?'сигнал получен':age+' с с последнего сигнала'));
   const heading = Number.isFinite(orientation?.bearingDeg) && s.yaw!==null
     ? Math.round(((orientation.bearingDeg+s.yaw)%360+360)%360)%360+'° по плану' : 'ориентир не подтверждён';
   say(el('abkSensorInfo'),(liveVideo()?'Есть изображение':'Ожидаем изображение')+' · '+sensor+' · '+heading+'.');
 }
 function drawPlan(s) {
+  if (!s.selection || s.sensorError) {
+    removeLabels();fix.disabled=true;
+    say(el('abkLiveStatus'),s.sensorError || 'Камера включена. Для табличек отметьте ниже своё место и видимый ориентир.');
+    return;
+  }
   const orientation = rearCameraOrientation(s.angles,screenAngle());
   if (orientation && performance.now()-s.orientationAt > SENSOR_IDLE_MS) {
     removeLabels();fix.disabled=true;
@@ -235,6 +240,7 @@ function stopSession(message='') {
   if (card.open) card.close();
   removeLabels();
   live.hidden=true;setup.hidden=false;
+  el('abkSetupPicker').append(el('abkPicker'));
   say(el('abkSetupStatus'),message);
   updateSetup();
 }
@@ -278,41 +284,68 @@ async function enableTags(s) {
     if (session===s) stopSession('Не удалось загрузить чтение меток. Проверьте соединение и попробуйте снова.');
   }
 }
+function enablePlanSensor(s) {
+  s.sensorError = '';
+  el('abkRetrySensor').hidden = true;
+  // Safari requires the permission call to happen during a visitor's tap.
+  void requestOrientation().catch(()=>false).then(allowed=>{
+    if (session!==s) return;
+    s.sensorAllowed=allowed;
+    if (!allowed) {
+      s.sensorError='Для наведения на точки разрешите датчики движения или выберите режим «По печатной метке».';
+      el('abkRetrySensor').hidden=!window.DeviceOrientationEvent;
+    }
+    tick();
+  });
+}
+function applyPlanSelection(s, selection) {
+  s.selection = selection;
+  s.yaw = null;
+  removeLabels();
+  el('abkLivePicker').hidden=!!selection;
+  fix.hidden=!selection;
+  fix.disabled=true;
+  el('abkReticle').hidden=!selection;
+  el('abkAimDetails').hidden=!selection;
+  el('abkAimDetails').open=false;
+  el('abkReaim').hidden=true;
+  el('abkChangePlace').textContent=selection?'Сменить место':'Выключить камеру';
+  el('abkPlaceLabel').textContent=selection ? selection.floor+' этаж · '+selection.roomName : 'Камера в АБК';
+  if (selection) picker.drawPreview(el('abkAimPreview'));
+}
 function startSession() {
   if (session || tab!=='abkField' || !cameraAvailable()) return;
   const selection = method==='plan' ? picker?.getSelection() : null;
-  if (method==='plan' && !selection) return;
-  const s = {method,selection,yaw:null,angles:null,orientationAt:0,sensorAllowed:false,
+  const s = {method,selection,yaw:null,angles:null,orientationAt:0,sensorAllowed:false,sensorError:'',
     visible:new Map(),videoTime:-1,lastVideoFrame:performance.now()};
   session=s;
-  // On iOS both permission requests must originate in this tap.
+  setup.hidden=true;live.hidden=false;
+  el('abkLivePicker').hidden=true;
+  el('abkReaim').hidden=true;el('abkResumeVideo').hidden=true;
+  el('abkRetrySensor').hidden=true;
+  el('abkSensorDetails').hidden=method!=='plan';el('abkSensorDetails').open=false;
+  say(el('abkLiveStatus'),'Ожидаем камеру…');
+  // Both permission requests originate in this tap, even if the plan is loading.
   if (method==='plan') {
+    el('abkLivePicker').append(el('abkPicker'));
+    applyPlanSelection(s,selection);
     window.addEventListener('deviceorientation',onOrientation);
     window.addEventListener('deviceorientationabsolute',onOrientation);
-    void requestOrientation().then(allowed=>{
-      if (session!==s) return;
-      if (!allowed) stopSession('В режиме по плану нужен доступ к датчикам движения. Разрешите его в настройках сайта или выберите «По печатной метке».');
-      else {s.sensorAllowed=true;tick();}
-    }).catch(()=>{if(session===s)stopSession('Датчики недоступны. Проверьте разрешение или выберите «По печатной метке».');});
+    enablePlanSensor(s);
+  } else {
+    el('abkPlaceLabel').textContent='Чтение меток АБК';
+    el('abkChangePlace').textContent='Выключить камеру';
+    fix.hidden=true;fix.disabled=true;
+    el('abkAimDetails').hidden=true;el('abkReticle').hidden=true;
+    void enableTags(s);
   }
   void camera.start();
-  if (method==='tags') void enableTags(s);
-  setup.hidden=true;live.hidden=false;
-  el('abkPlaceLabel').textContent = selection ? selection.floor+' этаж · '+selection.roomName : 'Чтение меток АБК';
-  el('abkChangePlace').textContent=selection?'Сменить место':'Выключить камеру';
-  fix.hidden=!selection;fix.disabled=true;
-  el('abkReaim').hidden=true;el('abkReticle').hidden=!selection;
-  el('abkResumeVideo').hidden=true;
-  el('abkSensorDetails').hidden=!selection;el('abkSensorDetails').open=false;
-  const details=el('abkAimDetails');details.hidden=!selection;details.open=false;
-  if(selection)picker.drawPreview(el('abkAimPreview'));
-  say(el('abkLiveStatus'),'Ожидаем камеру…');
-  timer=setInterval(tick,selection?90:155);
+  timer=setInterval(tick,method==='plan'?90:155);
   el('abkPlaceLabel').scrollIntoView?.({block:'start'});
 }
 fix.onclick=()=>{
   const s=session;
-  if (!s || s.method!=='plan' || !s.sensorAllowed || !liveVideo() || performance.now()-s.orientationAt>SENSOR_IDLE_MS) return;
+  if (!s?.selection || !s.sensorAllowed || !liveVideo() || performance.now()-s.orientationAt>SENSOR_IDLE_MS) return;
   const orientation=rearCameraOrientation(s.angles,screenAngle());
   if (!orientation || Math.abs(orientation.pitchDeg)>=65) return;
   s.yaw=calibratePlanYaw(s.selection.origin,s.selection.aim,orientation);
@@ -326,6 +359,7 @@ el('abkResumeVideo').onclick=()=>{
   startSession();
 };
 el('abkSensorDetails').addEventListener('toggle',()=>{if(session)sensorInfo(session);});
+el('abkRetrySensor').onclick=()=>{if(session?.method==='plan')enablePlanSensor(session);};
 el('abkReaim').onclick=()=>{
   if (!session) return;
   session.yaw=null;el('abkReaim').hidden=true;fix.hidden=false;tick();
@@ -381,12 +415,19 @@ function followFieldLink() {
   }
   el('abkPicker').hidden=method!=='plan';el('abkTagSetup').hidden=method!=='tags';
   el('abkFieldIntro').textContent=method==='plan' ?
-    'Отметьте, где стоите, и выберите ориентир. При повороте телефона с этого места появятся деревья вашего помещения.' :
+    'Включите камеру. Для табличек отметьте на плане своё место и видимый ориентир.' :
     'Для обхода обоих этажей наведите камеру на метку у растения.';
   el('abkBackToFloor').href='#floor-'+level;
   if (method==='plan') {
-    if (!picker) picker=createPlanPicker(el('abkPicker'),{floor:level,roomId:requestedRoom,onChange:(_choice,activeFloor)=>{
+    if (!picker) picker=createPlanPicker(el('abkPicker'),{floor:level,roomId:requestedRoom,onChange:(choice,activeFloor)=>{
       level=activeFloor;el('abkBackToFloor').href='#floor-'+level;el('abkPlanMode').href='#abk-camera-'+level;
+      if (session?.method==='plan' && choice && !session.selection) {
+        applyPlanSelection(session,choice);
+        tick();
+        el('abkPlaceLabel').scrollIntoView({block:'start'});
+      } else if (choice && !session && !setup.hidden) {
+        start.scrollIntoView({block:'nearest'});
+      }
       updateSetup();
     }});
     else picker.setFloor(level,requestedRoom);

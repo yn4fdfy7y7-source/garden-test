@@ -31,3 +31,9 @@
 #abkSensorDetails {margin:12px 0;color:var(--green);font-size:14px}
 #abkSensorDetails summary {cursor:pointer}
 #abkSensorInfo {line-height:1.5;margin:8px 0}
+#abkSetupPicker:not(:empty),#abkLivePicker:not(:empty) {margin-top:14px}
+@media (max-height:500px) and (orientation:landscape) {
+  #abkFieldPage .heading {margin-bottom:6px}
+  #abkFieldPage .heading p {margin:4px 0}
+  #abkFieldPage .abk-methods {margin:4px 0}
+}
