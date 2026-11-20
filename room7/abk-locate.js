@@ -60,7 +60,7 @@ function floorBox(floor, room) {
     y1: Math.min(floor.y1, Math.max(...ys) + 650)};
 }
 
-function drawMap(node, level, floor, box, rooms, chosen, origin, aim, cursor) {
+function drawMap(node, level, floor, box, rooms, chosen, origin, aim, cursor, treePoints = [], labelTrees = false) {
   const w = floor.w, h = floor.h;
   const px = x => (x - floor.x0) / (floor.x1 - floor.x0) * w;
   const py = y => (floor.y1 - y) / (floor.y1 - floor.y0) * h;
@@ -84,18 +84,30 @@ function drawMap(node, level, floor, box, rooms, chosen, origin, aim, cursor) {
   if (origin && aim) scene.append(svg('line', {x1: px(origin.x), y1: py(origin.y), x2: px(aim.x), y2: py(aim.y),
     class:'abkl-ray', 'vector-effect':'non-scaling-stroke'}));
   node.replaceChildren(scene);
-  function mark(p, type, label) {
+  function mark(p, type, label, title) {
     if (!p) return;
     const m = document.createElement('span');
     m.className = 'abkl-mark abkl-' + type; m.setAttribute('aria-hidden','true'); m.textContent = label;
+    if (title) m.title = title;
     m.style.left = (100 * (px(p.x) - left) / width) + '%';
     m.style.top = (100 * (py(p.y) - top) / height) + '%';
     node.append(m);
+    return m;
+  }
+  for (const tree of treePoints) {
+    const marker = mark(tree, 'tree', '', tree.name);
+    if (labelTrees) {
+      const label = document.createElement('span');
+      label.className = 'abkl-plant-label';
+      if (tree.x > (box.x0 + box.x1) / 2) label.classList.add('abkl-label-left');
+      label.textContent = tree.name;
+      marker.append(label);
+    }
   }
   mark(origin, 'here', '1'); mark(aim, 'there', '2'); mark(cursor, 'cursor', '+');
 }
 
-export function createPlanPicker(container, {floor: initialFloor = '1', onChange = () => {}} = {}) {
+export function createPlanPicker(container, {floor: initialFloor = '1', roomId = '', onChange = () => {}} = {}) {
   const panel = document.createElement('div');
   panel.className = 'abkl';
   panel.innerHTML = `
@@ -105,6 +117,7 @@ export function createPlanPicker(container, {floor: initialFloor = '1', onChange
     </div><label class="abkl-zoom">Увеличить план<select class="abkl-room" aria-label="Увеличить помещение"></select></label></div>
     <p class="abkl-status" role="status" aria-live="polite"></p>
     <button type="button" class="abkl-hit" aria-label="Выбрать точку на плане" hidden></button>
+    <p class="abkl-key" hidden><span><i aria-hidden="true"></i>Дерево</span><span>AP — точка Wi-Fi</span></p>
     <p class="abkl-guide">С клавиатуры двигайте прицел стрелками и нажмите Enter. Shift увеличивает шаг.</p>
     <div class="abkl-actions"><button type="button" class="abkl-origin-reset" hidden>Изменить своё место</button>
       <button type="button" class="abkl-aim-reset" hidden>Изменить ориентир</button>
@@ -113,51 +126,69 @@ export function createPlanPicker(container, {floor: initialFloor = '1', onChange
   const get = cls => panel.querySelector('.abkl-' + cls);
   const map = get('hit'), status = get('status'), select = get('room');
   let plan, trees, eligible = [], room = null, origin = null, aim = null, cursor = null;
+  let roomTrees = [], visibleTrees = [];
   let level = String(initialFloor) === '2' ? '2' : '1';
-  let zoom = '', loaded = false, disposed = false;
+  let zoom = '', requestedRoom = roomId, loaded = false, disposed = false;
 
   function selection() {
-    if (!origin || !aim || !room) return null;
-    const roomTrees = trees.filter(t => t.room === room.id && t.floor === level);
+    if (!origin || !aim || !visibleTrees.length) return null;
     return {floor: level, roomId: room.id, roomName: room.name, origin: {...origin}, aim: {...aim},
-      trees: roomTrees, visibleTrees: roomTrees.filter(tree => unobstructedRoomLine(origin, tree, room.poly))};
+      trees: roomTrees, visibleTrees};
   }
-  function resetState() { origin = null; aim = null; room = null; cursor = null; }
+  function resetState() { origin = null; aim = null; room = null; cursor = null; roomTrees = []; visibleTrees = []; }
   function currentBox() { return floorBox(plan.floors[level], eligible.find(r => r.id === zoom)); }
   function paint() {
     if (!loaded) return;
     const box = currentBox();
     if (!cursor) cursor = {x:(box.x0 + box.x1)/2, y:(box.y0 + box.y1)/2};
     const shownRooms = zoom ? eligible.filter(r => r.id === zoom) : eligible;
-    drawMap(map, level, plan.floors[level], box, shownRooms, room, origin, aim, cursor);
+    const treePoints = room ? roomTrees : trees.filter(t => t.floor === level && (!zoom || t.room === zoom));
+    drawMap(map, level, plan.floors[level], box, shownRooms, room, origin, aim, cursor, treePoints, Boolean(zoom));
   }
   function update(message = '') {
     for (const button of panel.querySelectorAll('.abkl-floor')) button.setAttribute('aria-pressed', String(button.dataset.floor === level));
-    select.disabled = !loaded; map.hidden = !loaded;
+    select.disabled = !loaded; map.hidden = !loaded; get('key').hidden = !loaded;
     get('origin-reset').hidden = !origin; get('aim-reset').hidden = !aim;
-    const step = !origin ? '1. Отметьте, где вы стоите, внутри выделенного помещения.'
-      : !aim ? '2. ' + room.name + '. Отметьте видимый угол, стену или дверной проём, на который направите телефон.'
-      : room.name + ' · 1 — ваше место, 2 — выбранный ориентир.';
+    let step = '1. Отметьте на плане место, где вы стоите.';
+    if (zoom && !origin) {
+      const focusedRoom = eligible.find(r => r.id === zoom);
+      const names = trees.filter(t => t.floor === level && t.room === zoom).map(t => t.name);
+      step = focusedRoom.name + ' · ' + names.join(', ') + '. ' + step;
+    }
+    if (origin && !visibleTrees.length) {
+      step = room.name + '. Деревья отсюда скрыты за стеной. Перейдите ближе к одной из меток и отметьте новое место.';
+    } else if (origin) {
+      const names = visibleTrees.map(tree => tree.name).join(', ');
+      step = aim
+        ? room.name + ' · ' + names + '. Место и ориентир выбраны. Нажмите «Включить камеру».'
+        : '2. ' + room.name + ' · ' + names + '. Отметьте стену, угол или дверной проём, который видите.';
+    }
     status.textContent = message || (loaded ? step : 'Загружаем планы этажей…');
     map.setAttribute('aria-label', 'План, ' + level + ' этаж. ' + step);
     paint(); onChange(selection(), level);
   }
-  function showFloor(newLevel) {
-    level = String(newLevel) === '2' ? '2' : '1'; zoom = ''; resetState();
+  function showFloor(newLevel, nextRoom = '') {
+    level = String(newLevel) === '2' ? '2' : '1';
+    requestedRoom = nextRoom; zoom = ''; resetState();
     if (loaded) {
       const floorTrees = trees.filter(t => t.floor === level);
       eligible = plan.rooms.filter(r => r.floor === level && floorTrees.some(t => t.room === r.id));
       const sorted = [...eligible].sort((a,b) => a.name.localeCompare(b.name,'ru',{numeric:true}));
       select.replaceChildren(new Option('Весь этаж',''), ...sorted.map(r => new Option(r.name, r.id)));
+      zoom = eligible.some(r => r.id === requestedRoom) ? requestedRoom : '';
+      select.value = zoom;
     }
     update();
   }
   function place(p) {
     if (!loaded) return;
-    if (!origin) {
+    if (!origin || !visibleTrees.length) {
       const selected = eligible.find(r => (!zoom || r.id === zoom) && inside(p,r.poly) && nearestWall(p,r.poly).distance > 1);
-      if (!selected) { update('Выберите своё место внутри подсвеченного кабинета или холла.'); return; }
-      origin = p; room = selected; cursor = {...p}; update(); return;
+      if (!selected) { update(origin ? '' : 'Выберите своё место внутри подсвеченного кабинета или холла.'); return; }
+      origin = p; room = selected; cursor = {...p};
+      roomTrees = trees.filter(tree => tree.floor === level && tree.room === room.id);
+      visibleTrees = roomTrees.filter(tree => unobstructedRoomLine(origin, tree, room.poly));
+      update(); return;
     }
     aim = null;
     const wall = nearestWall(p, room.poly), box = currentBox();
@@ -166,6 +197,11 @@ export function createPlanPicker(container, {floor: initialFloor = '1', onChange
     if (Math.hypot(wall.x - origin.x, wall.y - origin.y) < 1000 - 1e-6) { update('Выберите ориентир не ближе одного метра от вашего места.'); return; }
     if (!unobstructedRoomLine(origin, wall, room.poly)) { update('Между точками есть стена. Выберите ориентир, который видно с вашего места.'); return; }
     aim = {x:wall.x, y:wall.y}; cursor = {...aim}; update();
+    // On the phone the bottom tab bar can cover the newly enabled camera button.
+    if (window.matchMedia('(max-width: 760px)').matches) {
+      const start = container.closest('#abkSetupPanel')?.querySelector('#abkStartCamera:enabled');
+      start?.scrollIntoView({block:'nearest', inline:'nearest'});
+    }
   }
 
   for (const button of panel.querySelectorAll('.abkl-floor')) button.onclick = () => showFloor(button.dataset.floor);
@@ -202,7 +238,7 @@ export function createPlanPicker(container, {floor: initialFloor = '1', onChange
       const read = async url => { const response = await fetch(url); if (!response.ok) throw new Error(); return response.json(); };
       const data = await Promise.all([read(PLAN_DATA), read(TREE_DATA)]);
       if (disposed) return false;
-      [plan, trees] = data; loaded = true; showFloor(level); return true;
+      [plan, trees] = data; loaded = true; showFloor(level, requestedRoom); return true;
     } catch {
       if (!disposed) { get('retry').hidden = false; update('Не удалось загрузить план АБК.'); }
       return false;

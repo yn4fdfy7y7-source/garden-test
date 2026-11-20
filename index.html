@@ -1,6 +1,14 @@
 <!doctype html>
 <html lang="ru">
 <head>
+<script>
+if (new URLSearchParams(location.search).get('mode') === 'abk') {
+  const camera = new URL('room7/', location.href);
+  camera.search = location.search;
+  camera.hash = location.hash;
+  location.replace(camera.href);
+}
+</script>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#183e33"><script>try{if(navigator.maxTouchPoints>0&&Math.min(screen.width,screen.height)<=900)document.documentElement.classList.add('phone-layout')}catch{}</script><title>Сад рядом — тестовый путеводитель</title>
 <meta name="description" content="Тестовый путеводитель по Ботаническому саду СПбГУ. Реальные точки съёмки, демонстрационные названия и метровые зоны деревьев.">
@@ -36,7 +44,7 @@ html.phone-layout .shell{display:block}html.phone-layout .sidebar{height:66px;po
 <main class="workspace"><div id="bootNotice" class="demo-warning" role="alert">Если кнопки не реагируют, откройте сайт в Safari или Chrome по HTTPS-ссылке. Предпросмотр HTML-файла может не запускать JavaScript.</div><header class="topbar"><div class="eyebrow">Прогулка начинается с любопытства</div><div class="mobile-brand"><svg class="icon"><use href="#i-leaf"/></svg>Сад рядом</div><div class="top-actions"><span class="badge"><span class="dot"></span>ПОЛЕВОЙ ТЕСТ · V0.12</span><button class="quiet" id="helpButton">Как проверить</button></div></header>
 <section id="cameraPage"><div class="sensor-start" style="background:#fffef9;border:1px solid #d8dfce;border-radius:16px;padding:18px;margin-bottom:20px">
 <button id="startSensors" style="background:#193f33;color:white;width:100%;padding:16px;border-radius:12px;font-size:15px;font-weight:600">Начать прогулку</button>
-<div class="camera-tools"><button class="text-button" id="retryGPS">Включить геопозицию</button><button class="text-button" id="retryOrientation">Включить компас</button></div>
+<div class="camera-tools"><a class="text-button" href="room7/?mode=abk">Камера в АБК</a><button class="text-button" id="retryGPS">Включить геопозицию</button><button class="text-button" id="retryOrientation">Включить компас</button></div>
 <p style="font-size:12px;line-height:1.6;color:#687660;margin:12px 0">Кнопка запускает запросы компаса, геопозиции и камеры. Если один из них не появился — нажмите его отдельную кнопку. При сохранённом разрешении или запрете нового окна может не быть. Видео и координаты остаются на телефоне.</p>
 <div aria-live="polite" style="font-size:12px;line-height:1.7"><div id="cameraStatus">Камера: ещё не включена.</div><div id="gpsStatusLine">Геолокация: ещё не запрашивалась.</div><div id="orientationStatus">Направление: ещё не запрашивалось.</div></div>
 <details class="diag"><summary>Safari не спрашивает разрешение</summary><p>Геопозиция: откройте меню страницы Safari → настройки веб-сайта → геопозиция. Разрешите доступ или выберите запрос. Также проверьте службы геолокации iPhone и доступ для веб-сайтов Safari. Затем повторите «Включить геопозицию».</p><p>Компас: нажмите «Включить компас» непосредственно на странице. Если Safari возвращает запрет, проверьте доступ к движению и ориентации в настройках Safari (если этот пункт есть в вашей версии). Перезагрузите страницу и повторите. Отсутствие показаний само по себе не означает запрет.</p></details><p style="font-size:11px;color:#687660;margin-bottom:0">При неточном GPS нажмите «Я у дерева — выбрать на плане», отметьте свой экземпляр и подтвердите выбор. Камера не распознаёт изображение; автоматический выбор пока недостоверен.</p></div><div class="viewer" id="viewer"><button id="closeField" class="field-close" hidden aria-label="Выйти из камеры на весь экран">×</button>
@@ -48,7 +56,7 @@ html.phone-layout .shell{display:block}html.phone-layout .sidebar{height:66px;po
 <div class="view-bottom"><div><div class="view-distance"><span id="distanceValue">2,4</span> <small>м</small></div><div class="view-caption" id="viewCaption">до выбранного дерева · нужно подойти</div></div><div class="compass-chip"><svg class="icon" id="directionArrow"><use href="#i-compass"/></svg><span id="angleValue">32°</span></div></div><div class="field-hud" id="fieldHud" hidden><div id="fieldSensorLine"></div><p id="fieldHint"></p><div class="field-actions"><button id="fieldStart">Запустить / возобновить</button><button id="fieldOrient">Ориентир</button><button id="fieldMap">План</button><button id="fieldStop">Выключить камеру</button></div></div></div>
 <div class="heading"><div><h1>Подойдите. Наведите.<br>Познакомьтесь.</h1><p>У каждого дерева — своя карточка. GPS помогает найти кандидатов рядом; радиус дерева — 3 метра.</p></div><div class="count"><b>3 м</b>радиус знакомства</div></div>
 
-<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0"><button class="text-button" id="liveMode" aria-pressed="true">GPS телефона</button><button class="text-button" id="demoMode" aria-pressed="false">Симуляция дома</button><a class="text-button" href="room7/">Кабинет № 7</a></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0"><button class="text-button" id="liveMode" aria-pressed="true">GPS телефона</button><button class="text-button" id="demoMode" aria-pressed="false">Симуляция дома</button><a class="text-button" href="room7/#room7-photo">Фоторежим кабинета № 7</a></div>
 <div class="camera-tools"><button class="text-button" id="chooseTreeOnMap">Я у дерева — выбрать на плане</button></div>
 <div id="manualTreeCard" class="info-card" hidden><strong>Вы выбрали дерево вручную</strong><p id="manualTreeName"></p><p>Это ваш выбор на плане, а не распознавание камерой. Он действует до 2 минут и сбрасывается при смене точки или удалении более чем на 20 м по GPS.</p><button class="text-button" id="openManualTree">Открыть карточку</button><button class="text-button" id="clearTreeChoice">Сбросить выбор</button></div>
 <div id="correctionStatus" class="demo-warning"></div><details class="diag"><summary>Уточнить положение и направление</summary><p>Необязательно: если вы точно знаете своё место или ориентир на плане. Поправки временные и не повышают измеренную точность GPS.</p><button class="text-button" id="positionCorrection">Уточнить позицию</button><button class="text-button" id="directionCorrection">Уточнить направление</button><button class="text-button" id="clearCorrection">Сбросить поправки</button></details>

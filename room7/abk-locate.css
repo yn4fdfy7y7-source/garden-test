@@ -25,3 +25,11 @@
 .abkl-actions {margin-top:7px}
 .abkl-actions button {text-decoration:underline;text-underline-offset:3px}
 .abkl-preview {max-width:300px}
+.abkl-key {display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:7px 0;color:var(--muted,#536b60);font-size:13px;line-height:1.35}
+.abkl-key span {display:inline-flex;align-items:center;gap:5px}
+.abkl .abkl-tree,.abkl-key i {width:11px;min-width:11px;height:11px;box-sizing:border-box;border:1px solid white;border-radius:8px 2px 8px 2px;background:#317044;box-shadow:0 0 0 1px #285438}
+.abkl-plant-label {position:absolute;left:12px;top:50%;transform:translateY(-50%);padding:2px 4px;border-radius:4px;background:#edf4e3;color:#183f28;font:600 13px/1.15 system-ui;white-space:nowrap}
+.abkl-label-left {left:auto;right:12px}
+@media (max-width:760px) {
+  #abkSetupPanel #abkStartCamera {scroll-margin-block-end:calc(80px + env(safe-area-inset-bottom))}
+}

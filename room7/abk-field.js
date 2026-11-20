@@ -1,5 +1,5 @@
-import { createPlanPicker } from './abk-locate.js';
-import { rearCameraOrientation, calibratePlanYaw, projectPlanPoint } from './abk-direction.js';
+import { createPlanPicker } from './abk-locate.js?v=aim2';
+import { readPlanOrientationSample, rearCameraOrientation, calibratePlanYaw, projectPlanPoint } from './abk-direction.js?v=aim2';
 
 const el = id => document.getElementById(id);
 const setup = el('abkSetupPanel');
@@ -12,7 +12,9 @@ let method = 'plan';
 let level = '1';
 let picker, session, tagData;
 let timer = 0;
-const fieldHash = /^#abk-camera(?:-([12]))?$/;
+const fieldHash = /^#abk-camera(?:-([12])(?:-(r\d+))?)?$/;
+const SOURCE_GRACE_MS = 1800;
+const SENSOR_IDLE_MS = 8000;
 
 function say(node, message) {
   if (node.textContent !== message) node.textContent = message;
@@ -39,11 +41,22 @@ function screenAngle() {
 }
 function onOrientation(event) {
   const s = session;
-  if (!s || s.method !== 'plan' || document.hidden || (s.sensorType && s.sensorType !== event.type)) return;
-  const axes = rearCameraOrientation(event, screenAngle());
-  if (!axes) return;
-  s.sensorType = event.type;
-  s.angles = {alpha:event.alpha, beta:event.beta, gamma:event.gamma};
+  if (!s || s.method !== 'plan' || document.hidden) return;
+  const now = performance.now();
+  const elapsed = now-s.orientationAt;
+  const sample = readPlanOrientationSample(event,s.angles,elapsed);
+  if (!sample) return;
+  const switched = s.angles && s.angles.source !== sample.source;
+  if (switched && elapsed < SOURCE_GRACE_MS) return;
+  if ((switched || sample.needsRealignment) && s.yaw !== null) {
+    s.yaw = null;
+    s.sourceChanged = true;
+    fix.hidden = false;
+    el('abkReaim').hidden = true;
+    removeLabels();
+  }
+  s.angles = sample;
+  s.orientationAt = now;
 }
 async function requestOrientation() {
   const api = window.DeviceOrientationEvent;
@@ -102,8 +115,45 @@ function viewSize() {
   return {videoWidth:camera.video.videoWidth,videoHeight:camera.video.videoHeight,
     viewportWidth:view.clientWidth,viewportHeight:view.clientHeight};
 }
+function turnHint(s, orientation) {
+  if (!Number.isFinite(orientation.bearingDeg) || Math.abs(orientation.pitchDeg) > 40)
+    return 'Наведите камеру на стену на высоте телефона.';
+  const {origin, visibleTrees} = s.selection;
+  const heading = orientation.bearingDeg + s.yaw;
+  let nearest = null;
+  for (const tree of visibleTrees) {
+    const dx = tree.x-origin.x, dy = tree.y-origin.y;
+    if (Math.hypot(dx,dy) <= 200) continue;
+    const bearing = Math.atan2(dx,dy) * 180 / Math.PI;
+    const delta = ((bearing-heading) % 360 + 540) % 360 - 180;
+    if (!nearest || Math.abs(delta)<Math.abs(nearest.delta)) nearest={tree,delta};
+  }
+  if (!nearest) return 'С этого места точки за стеной или слишком близко. Отойдите и нажмите «Сменить место».';
+  const {tree,delta} = nearest;
+  if (Math.abs(delta)>8) {
+    const degrees = Math.max(5,5*Math.round(Math.abs(delta)/5));
+    return 'До «'+tree.name+'» по плану — поверните '+(delta>0?'вправо':'влево')+' примерно на '+degrees+'°.';
+  }
+  return '«'+tree.name+'» по плану впереди. '+(orientation.pitchDeg>0?'Опустите':'Поднимите')+' камеру к уровню горизонта.';
+}
+function sensorInfo(s) {
+  if (s.method!=='plan' || !el('abkSensorDetails').open) return;
+  const orientation = rearCameraOrientation(s.angles,screenAngle());
+  const age = s.angles ? Math.floor((performance.now()-s.orientationAt)/1000) : null;
+  const source = {relative:'датчик поворота',absolute:'абсолютная ориентация',compass:'компас'};
+  const sensor = !s.sensorAllowed ? 'ожидаем разрешение' : !s.angles ? 'ожидаем показания' :
+    source[s.angles.source]+' · '+(age<2?'сигнал получен':age+' с с последнего сигнала');
+  const heading = Number.isFinite(orientation?.bearingDeg) && s.yaw!==null
+    ? Math.round(((orientation.bearingDeg+s.yaw)%360+360)%360)%360+'° по плану' : 'ориентир не подтверждён';
+  say(el('abkSensorInfo'),(liveVideo()?'Есть изображение':'Ожидаем изображение')+' · '+sensor+' · '+heading+'.');
+}
 function drawPlan(s) {
   const orientation = rearCameraOrientation(s.angles,screenAngle());
+  if (orientation && performance.now()-s.orientationAt > SENSOR_IDLE_MS) {
+    removeLabels();fix.disabled=true;
+    say(el('abkLiveStatus'),'Показания поворота давно не обновлялись. Слегка поверните телефон и проверьте датчики ниже.');
+    return;
+  }
   const canAim = s.sensorAllowed && Number.isFinite(orientation?.bearingDeg) && Math.abs(orientation.pitchDeg) < 65;
   fix.disabled = !canAim;
   if (s.yaw === null) {
@@ -111,6 +161,7 @@ function drawPlan(s) {
     const msg = !s.sensorAllowed ? 'Запрашиваем доступ к датчикам…' :
       !orientation ? 'Слегка поверните телефон. Ожидаем данные датчиков. Если их нет, откройте режим «По печатной метке».' :
       !canAim ? 'Держите телефон примерно вертикально и наведите прицел на выбранный ориентир.' :
+      s.sourceChanged ? 'Привязку направления нужно обновить. Наведитесь на тот же ориентир и подтвердите его ещё раз.' :
       'Наведите прицел на выбранный ориентир на высоте телефона и подтвердите направление.';
     say(el('abkLiveStatus'),msg);
     return;
@@ -124,8 +175,7 @@ function drawPlan(s) {
     if (p) points.push({tree,x:p.x,y:p.y});
   }
   draw(points);
-  say(el('abkLiveStatus'),points.length ? 'Коснитесь названия. Если вы отошли, нажмите «Сменить место».' :
-    'Поворачивайте телефон с отмеченного места. Если вы отошли, нажмите «Сменить место».');
+  say(el('abkLiveStatus'),points.length ? 'Коснитесь названия. Если вы отошли, нажмите «Сменить место».' : turnHint(s,orientation));
 }
 function drawTag(s) {
   if (!s.reader) return;
@@ -145,8 +195,13 @@ function tick() {
   const s = session;
   if (!s || card.open) return;
   const now = performance.now();
+  sensorInfo(s);
   if (!liveVideo()) {
     removeLabels();fix.disabled=true;
+    if (s.receivedImage) {
+      say(el('abkLiveStatus'),'Изображение с камеры приостановлено. Можно возобновить его с этого места.');
+      el('abkResumeVideo').hidden=false;
+    }
     if (s.openedAt && !s.receivedImage && now-s.openedAt>12000)
       stopSession('Камера включилась, но изображение не поступило. Нажмите «Включить камеру» ещё раз.');
     return;
@@ -158,9 +213,11 @@ function tick() {
   }
   if (now-s.lastVideoFrame > 1400) {
     removeLabels(); fix.disabled=true;
-    say(el('abkLiveStatus'),'Ожидаем изображение с камеры.');
+    el('abkResumeVideo').hidden=false;
+    say(el('abkLiveStatus'),'Изображение с камеры не обновляется. Нажмите «Возобновить камеру».');
     return;
   }
+  el('abkResumeVideo').hidden=true;
   if (s.method === 'plan') drawPlan(s);
   else if (s.reader) {
     try { drawTag(s); }
@@ -225,7 +282,7 @@ function startSession() {
   if (session || tab!=='abkField' || !cameraAvailable()) return;
   const selection = method==='plan' ? picker?.getSelection() : null;
   if (method==='plan' && !selection) return;
-  const s = {method,selection,yaw:null,angles:null,sensorType:null,sensorAllowed:false,
+  const s = {method,selection,yaw:null,angles:null,orientationAt:0,sensorAllowed:false,
     visible:new Map(),videoTime:-1,lastVideoFrame:performance.now()};
   session=s;
   // On iOS both permission requests must originate in this tap.
@@ -245,6 +302,8 @@ function startSession() {
   el('abkChangePlace').textContent=selection?'Сменить место':'Выключить камеру';
   fix.hidden=!selection;fix.disabled=true;
   el('abkReaim').hidden=true;el('abkReticle').hidden=!selection;
+  el('abkResumeVideo').hidden=true;
+  el('abkSensorDetails').hidden=!selection;el('abkSensorDetails').open=false;
   const details=el('abkAimDetails');details.hidden=!selection;details.open=false;
   if(selection)picker.drawPreview(el('abkAimPreview'));
   say(el('abkLiveStatus'),'Ожидаем камеру…');
@@ -253,13 +312,20 @@ function startSession() {
 }
 fix.onclick=()=>{
   const s=session;
-  if (!s || s.method!=='plan' || !s.sensorAllowed || !liveVideo()) return;
+  if (!s || s.method!=='plan' || !s.sensorAllowed || !liveVideo() || performance.now()-s.orientationAt>SENSOR_IDLE_MS) return;
   const orientation=rearCameraOrientation(s.angles,screenAngle());
   if (!orientation || Math.abs(orientation.pitchDeg)>=65) return;
   s.yaw=calibratePlanYaw(s.selection.origin,s.selection.aim,orientation);
   if(s.yaw===null)return;
+  s.sourceChanged=false;
   fix.hidden=true;el('abkAimDetails').open=false;el('abkReaim').hidden=false;tick();
 };
+el('abkResumeVideo').onclick=()=>{
+  if (!session) return;
+  stopSession();
+  startSession();
+};
+el('abkSensorDetails').addEventListener('toggle',()=>{if(session)sensorInfo(session);});
 el('abkReaim').onclick=()=>{
   if (!session) return;
   session.yaw=null;el('abkReaim').hidden=true;fix.hidden=false;tick();
@@ -279,18 +345,35 @@ document.addEventListener('visibilitychange',()=>{
 });
 function followFieldLink() {
   const url=new URL(location.href);
-  if (url.searchParams.get('mode')==='abk' && !url.hash) {
-    url.searchParams.delete('mode');url.hash='abk-camera';history.replaceState(null,'',url);
+  if (!url.hash) {
+    const queryMode=url.searchParams.get('mode');
+    const route={
+      abk:'abk-camera', 'abk-tags':'abk-tags', 'room7-photo':'room7-photo',
+      live:'garden-camera', demo:'garden-demo'
+    }[queryMode] || 'abk-camera';
+    url.searchParams.delete('mode');
+    url.hash=route;
+    history.replaceState(null,'',url);
   }
-  const floorMatch=fieldHash.exec(location.hash);
-  if (!floorMatch && location.hash!=='#abk-tags') {
-    if(tab==='abkField') showTab('camera');
+  const hash=location.hash;
+  const floorMatch=fieldHash.exec(hash);
+  if (!floorMatch && hash!=='#abk-tags') {
+    if (hash==='#catalog') showTab('catalog');
+    else if (hash==='#room7-photo' || hash==='#garden-camera' || hash==='#garden-demo') {
+      const photo=hash==='#room7-photo';
+      const nextMode=photo?'room':hash==='#garden-demo'?'demo':'live';
+      if (photo!==roomSelected || (!photo && mode!==nextMode)) setMode(nextMode);
+      showTab('camera');
+    } else if (hash!=='#garden' && !/^#floor-[12]$/.test(hash)) {
+      location.replace('#abk-camera');
+    }
     return;
   }
   stopSession();
   if (cameraEngine.ready || cameraEngine.pending || cameraEngine.stream) cameraEngine.stop();
   method=floorMatch?'plan':'tags';
   level=floorMatch?.[1] || level;
+  const requestedRoom=floorMatch?.[2] || '';
   showTab('abkField');
   for (const [id,value] of [['abkPlanMode','plan'],['abkTagsMode','tags']]) {
     const link=el(id);
@@ -302,11 +385,11 @@ function followFieldLink() {
     'Для обхода обоих этажей наведите камеру на метку у растения.';
   el('abkBackToFloor').href='#floor-'+level;
   if (method==='plan') {
-    if (!picker) picker=createPlanPicker(el('abkPicker'),{floor:level,onChange:(_choice,activeFloor)=>{
+    if (!picker) picker=createPlanPicker(el('abkPicker'),{floor:level,roomId:requestedRoom,onChange:(_choice,activeFloor)=>{
       level=activeFloor;el('abkBackToFloor').href='#floor-'+level;el('abkPlanMode').href='#abk-camera-'+level;
       updateSetup();
     }});
-    else picker.setFloor(level);
+    else picker.setFloor(level,requestedRoom);
   }
   updateSetup();
 }

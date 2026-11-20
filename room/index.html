@@ -1,6 +1,14 @@
 <!doctype html>
 <html lang="ru">
 <head>
+<script>
+if (new URLSearchParams(location.search).get('mode') === 'abk') {
+  const camera = new URL('../room7/', location.href);
+  camera.search = location.search;
+  camera.hash = location.hash;
+  location.replace(camera.href);
+}
+</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Где я · тест</title>
@@ -70,7 +78,7 @@ dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0}dt{color:va
 
 <section class="view" id="vCam">
   <video id="video" playsinline muted autoplay></video>
-  <div class="chip"><b id="zone">Определяю кабинет…</b><span id="zoneWhy">Wi-Fi: ожидание сканирования</span></div>
+  <div class="chip"><b id="zone">Определяю кабинет…</b><span id="zoneWhy">Wi-Fi: ожидание сканирования</span><div class="row"><a class="btn primary" href="../room7/?mode=abk">Камера в АБК</a></div></div>
   <div id="labels"></div>
   <div class="hint" id="hint">Наведите камеру на предмет</div>
   <div class="capbar" id="capbar" hidden>
@@ -82,7 +90,7 @@ dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0}dt{color:va
 <section class="view" id="vPlan" hidden>
   <div class="page">
     <h1>План здания</h1>
-    <div class="row"><a class="btn primary" href="../room7/">Открыть камеру кабинета № 7</a></div>
+    <div class="row"><a class="btn primary" href="../room7/?mode=abk">Камера в АБК</a><a class="btn" href="../room7/#room7-photo">Фоторежим кабинета № 7</a></div>
     <div class="row"><button class="btn" id="fl1" type="button">1 этаж</button><button class="btn" id="fl2" type="button">2 этаж</button><span class="muted" id="planHint"></span></div>
     <div class="plan"><img id="planImg" alt="План этажа"><svg id="planSvg"></svg></div>
     <p class="muted">Розовые точки — MikroTik по чертежу. Зелёные — предметы. Подсвечен кабинет, где вы сейчас по Wi-Fi.</p>
@@ -162,7 +170,7 @@ dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0}dt{color:va
 <div class="toast" id="toast" hidden></div>
 
 <script src="opencv.js" async></script>
-<script src="app.js"></script>
+<script src="app.js?v=abk2"></script>
 <script>if(typeof window.Native==='undefined'&&!/mock/.test(location.search))document.getElementById('webNote').hidden=false</script>
 </body>
 </html>

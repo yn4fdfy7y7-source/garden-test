@@ -166,7 +166,8 @@ function wifiTick() {
 /* ---------- OpenCV / recognition ---------- */
 async function initCv() {
   if (typeof cv === 'undefined') { setTimeout(initCv, 300); return }
-  if (cv instanceof Promise || (cv.then && !cv.Mat)) cv = await cv;
+  // The bundled OpenCV exposes a thenable that resolves to itself.
+  if (cv instanceof Promise) cv = await cv;
   if (!cv.Mat) { cv.onRuntimeInitialized = initCv; return }
   ORB = new cv.ORB(500); BF = new cv.BFMatcher(cv.NORM_HAMMING, false); cvReady = true;
 }

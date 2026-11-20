@@ -28,3 +28,6 @@
 #abkTagSetup p {margin:0 0 12px}
 #abkFieldLabels button::after {content:"";position:absolute;top:100%;left:var(--tip,50%);transform:translateX(-50%);border:5px solid transparent;border-bottom:0;border-top-color:#d7eda2}
 #abkFieldLabels button[data-below="true"]::after {top:auto;bottom:100%;border-top:0;border-bottom:5px solid #d7eda2}
+#abkSensorDetails {margin:12px 0;color:var(--green);font-size:14px}
+#abkSensorDetails summary {cursor:pointer}
+#abkSensorInfo {line-height:1.5;margin:8px 0}

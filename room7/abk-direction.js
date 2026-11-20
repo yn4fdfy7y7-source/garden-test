@@ -6,6 +6,74 @@ const MIN_DISTANCE_MM = 200;
 const DEFAULT_LONG_EDGE_FOV = 65;
 const finite = Number.isFinite;
 const wrap = degrees => ((degrees % 360) + 360) % 360;
+const signedTurn = degrees => wrap(degrees + 180) - 180;
+
+function opticalBearing(alpha, beta, gamma) {
+  const g = gamma * RAD;
+  return Math.atan2(-Math.sin(g), Math.sin(beta * RAD) * Math.cos(g)) * DEG - alpha;
+}
+
+/** Read a browser event into a snapshot; optional sensor fields often live on
+ * its prototype and are lost by object spread. The source identifies the yaw
+ * reference: changing between relative, Earth-fixed and magnetic yaw needs a
+ * new plan alignment. A full Euler sample always takes precedence. Pass the
+ * previous compass snapshot and elapsed milliseconds to preserve its yaw frame
+ * across pauses. needsRealignment flags an ambiguous crossing after a gap.
+ */
+export function readPlanOrientationSample(event, previous = null, elapsedMs = 0) {
+  if (!event || !finite(event.beta) || !finite(event.gamma)) return null;
+  const {alpha, beta, gamma} = event;
+  if (finite(alpha)) {
+    const absolute = event.absolute === true || event.type === 'deviceorientationabsolute';
+    const source = event.source === 'compass' ? 'compass' :
+      (event.source === 'absolute' || absolute ? 'absolute' : 'relative');
+    const value = {alpha: alpha >= 0 && alpha < 360 ? alpha : wrap(alpha), beta, gamma, source};
+    if (source === 'compass' && finite(event.compassHeading)) value.compassHeading = event.compassHeading;
+    return value;
+  }
+
+  // WebKit supplies Core Location's clockwise magnetic heading of the device
+  // in its natural portrait orientation. The horizontal direction of device
+  // +Y in the ZXY matrix is (-sin(alpha), cos(alpha)) * cos(beta).
+  const heading = event.webkitCompassHeading, accuracy = event.webkitCompassAccuracy;
+  if (!finite(heading) || heading < 0 || heading >= 360 ||
+      (accuracy != null && (!finite(accuracy) || accuracy < 0))) return null;
+  const upsideDown = Math.abs(beta) > 90;
+  const initialAlpha = (upsideDown ? 180 : 0) - heading;
+  let compassAlpha = initialAlpha;
+  let needsRealignment = false;
+  if (previous?.source === 'compass' &&
+      [previous.alpha, previous.beta, previous.gamma, previous.compassHeading].every(finite)) {
+    compassAlpha = previous.alpha - signedTurn(heading - previous.compassHeading);
+    // At upright, the top edge has no horizontal direction. A compass can
+    // bridge this point, or its reported azimuth can reverse by a half-turn.
+    // Preserve whichever convention the live stream uses across this crossing.
+    const crossed = upsideDown !== (Math.abs(previous.beta) > 90);
+    const poleDistance = value => Math.abs(Math.abs(value) - 90);
+    // Core Location and Core Motion update independently. A heading can flip
+    // a sample before or after the measured tilt crosses the pole.
+    const poleMargin = crossed ? 25 : 6;
+    const nearPole = poleDistance(beta) <= poleMargin && poleDistance(previous.beta) <= poleMargin;
+    if (crossed || nearPole) {
+      const last = opticalBearing(previous.alpha, previous.beta, previous.gamma);
+      const next = opticalBearing(compassAlpha, beta, gamma);
+      const turn = Math.abs(signedTurn(next - last));
+      if (elapsedMs > 750 && (crossed || turn >= 45)) {
+        // Between widely spaced samples a real turn and a magnetic reversal
+        // cannot be distinguished. Start a new yaw frame for explicit aiming.
+        needsRealignment = true;
+        compassAlpha = initialAlpha;
+      } else if (nearPole && turn > 135) {
+        compassAlpha += 180;
+      } else if (nearPole && turn >= 45) {
+        return null;
+      }
+    }
+  }
+  const value = {alpha: wrap(compassAlpha), beta, gamma, source: 'compass', compassHeading: heading};
+  if (needsRealignment) value.needsRealignment = true;
+  return value;
+}
 
 /** Axes of the displayed rear-camera image. Bearing increases clockwise from
  * the sensor's horizontal +Y; pitch is positive up, roll clockwise on screen.
@@ -14,8 +82,9 @@ const wrap = degrees => ((degrees % 360) + 360) % 360;
  * event from either an absolute or a relative Euler sensor is sufficient.
  */
 export function rearCameraOrientation(event, screenAngleDeg = 0) {
-  if (!event || ![event.alpha, event.beta, event.gamma, screenAngleDeg].every(finite)) return null;
-  const a = event.alpha * RAD, b = event.beta * RAD, g = event.gamma * RAD;
+  const sample = readPlanOrientationSample(event);
+  if (!sample || !finite(screenAngleDeg)) return null;
+  const a = sample.alpha * RAD, b = sample.beta * RAD, g = sample.gamma * RAD;
   const ca = Math.cos(a), sa = Math.sin(a), cb = Math.cos(b), sb = Math.sin(b);
   const cg = Math.cos(g), sg = Math.sin(g);
   const deviceRight = [ca*cg - sa*sb*sg, sa*cg + ca*sb*sg, -cb*sg];
