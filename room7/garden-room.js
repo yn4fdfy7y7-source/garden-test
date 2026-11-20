@@ -1,5 +1,5 @@
-import {createViewTracker} from './view-guard.js?v=field3';
-import * as roomEngine from './engine.js?v=field3b';
+import {createViewTracker} from './view-guard.js?v=field4';
+import * as roomEngine from './engine.js?v=window-retry-1';
 
 const viewer = document.getElementById('viewer');
 const labels = document.getElementById('roomLabels');
@@ -286,7 +286,12 @@ function acceptPose(result, pose, frame) {
     const direct=tracker.compare(veto.frame.stamp,frame.stamp);
     const p=direct.ok && direct.map(veto.anchor.x,veto.anchor.y);
     const nearMatch=p && Math.hypot(p.x-anchor.x,p.y-anchor.y)<.04;
-    if (!nearMatch && !tracker.confirmsPatch(veto.frame.stamp,frame.stamp,veto.anchor,{x:anchor.x,y:anchor.y})) return false;
+    if (!nearMatch && !tracker.confirmsPatch(veto.frame.stamp,frame.stamp,veto.anchor,anchor)) {
+      // Independent metric evidence supplies a new projection. Check its immediate
+      // neighborhood to allow for residual perspective error at this surface.
+      if (!result.diagnostics?.scanCenterM ||
+          !tracker.refineAnchor(veto.frame.stamp,frame.stamp,veto.anchor,anchor,3)) return false;
+    }
     obscured.delete(anchor.id);
     return true;
   });

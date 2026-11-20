@@ -22,7 +22,7 @@ export function createViewTracker() {
     for(let i=0;i<data.length;i++) data[i]=(77*rgba[4*i]+150*rgba[4*i+1]+29*rgba[4*i+2])>>8;
     return {w,h,data};
   }
-  return {capture, compare:compareViews, confirmsPatch};
+  return {capture, compare:compareViews, confirmsPatch, refineAnchor};
 }
 
 function corners(frame) {
@@ -142,6 +142,94 @@ function confirmsPatch(base, next, anchor, predicted) {
   return (ab-sa*sb/n)/Math.sqrt(va*vb)>.85;
 }
 
+// Measure motion left over at the anchor after global camera motion is removed.
+// Compare both the physical point ("center") and its surroundings: a hand can
+// cover a point without changing the surrounding wall.
+function newPatchStatistics() {
+  return {count:0, referenceSum:0, currentSum:0, referenceSquares:0, currentSquares:0, products:0};
+}
+
+function recordPair(stats, reference, current) {
+  stats.count++;
+  stats.referenceSum+=reference;
+  stats.currentSum+=current;
+  stats.referenceSquares+=reference*reference;
+  stats.currentSquares+=current*current;
+  stats.products+=reference*current;
+}
+
+function patchCorrelation(stats, minReferenceVariance, minCurrentVariance, minRatio, maxRatio) {
+  const {count,referenceSum,currentSum,referenceSquares,currentSquares,products}=stats;
+  const referenceEnergy=referenceSquares-referenceSum*referenceSum/count;
+  const currentEnergy=currentSquares-currentSum*currentSum/count;
+  if(referenceEnergy<count*minReferenceVariance || currentEnergy<count*minCurrentVariance) return -1;
+  const ratio=currentEnergy/referenceEnergy;
+  if(ratio<minRatio || ratio>maxRatio) return -1;
+  return (products-referenceSum*currentSum/count)/Math.sqrt(referenceEnergy*currentEnergy);
+}
+
+function residualScore(samples, frame, dx, dy) {
+  const surround=newPatchStatistics(), center=newPatchStatistics();
+  for(const point of samples) {
+    const current=sample(frame,point.predictedX+dx,point.predictedY+dy);
+    if(!Number.isFinite(current)) continue;
+    recordPair(surround,point.reference,current);
+    if(point.central) recordPair(center,point.reference,current);
+  }
+  if(surround.count<samples.length*.79 || center.count<13) return -1;
+  const surroundingCorrelation=patchCorrelation(surround,140,74,.42,2.45);
+  if(surroundingCorrelation<.82) return -1;
+  const centralCorrelation=patchCorrelation(center,45,25,.32,3.0);
+  if(centralCorrelation<.74) return -1;
+  return .70*surroundingCorrelation+.30*centralCorrelation;
+}
+
+function patchCenterVisible(frame,x,y) {
+  return x>=4 && y>=4 && x<frame.w-5 && y<frame.h-5;
+}
+
+function refineAnchor(base, next, anchor, predicted, radius = 7) {
+  if(!base || !next || base.w!==next.w || base.h!==next.h) return null;
+  const sourceX=anchor.x*(base.w-1), sourceY=anchor.y*(base.h-1);
+  const predictedX=predicted.x*(next.w-1), predictedY=predicted.y*(next.h-1);
+  const a=predicted.a ?? 1, b=predicted.b ?? 0;
+  if(!Number.isFinite(predictedX+predictedY+a+b) || Math.hypot(a,b)<.65 || Math.hypot(a,b)>1.6) return null;
+  // Partial borders can look like valid continuations of a rail or window frame.
+  // Require the whole verification center before and after any residual search.
+  if(!patchCenterVisible(base,sourceX,sourceY) || !patchCenterVisible(next,predictedX,predictedY)) return null;
+
+  const samples=[];
+  for(let y=-8;y<=8;y+=2) {
+    for(let x=-8;x<=8;x+=2) {
+      const reference=sample(base,sourceX+x,sourceY+y);
+      if(Number.isFinite(reference)) {
+        samples.push({reference, predictedX:predictedX+a*x-b*y, predictedY:predictedY+b*x+a*y,
+                      central:Math.abs(x)<=4 && Math.abs(y)<=4});
+      }
+    }
+  }
+  if(samples.length<28) return null;
+
+  const candidates=[];
+  for(let dy=-radius;dy<=radius;dy++) {
+    for(let dx=-radius;dx<=radius;dx++) {
+      if(dx*dx+dy*dy>radius*radius) continue;
+      const score=residualScore(samples,next,dx,dy);
+      if(score>=0) candidates.push({dx,dy,score});
+    }
+  }
+  candidates.sort((left,right)=>right.score-left.score);
+  const best=candidates[0];
+  if(!best || best.score<.865) return null;
+  // Reject repeated texture when a distinct displacement explains it just as well.
+  if(candidates.some(other=>Math.hypot(other.dx-best.dx,other.dy-best.dy)>=3 && best.score-other.score<.05)) return null;
+
+  const x=(predictedX+best.dx)/(next.w-1), y=(predictedY+best.dy)/(next.h-1);
+  if(!patchCenterVisible(next,predictedX+best.dx,predictedY+best.dy)) return null;
+  const result={x,y,a,b};
+  return confirmsPatch(base,next,anchor,result) ? result : null;
+}
+
 export function compareViews(base,next) {
   if(!base || !next || base.w!==next.w || base.h!==next.h || !base.data.length) return failed();
   const rows=matches(base,next), {w,h}=base;
@@ -173,7 +261,7 @@ export function compareViews(base,next) {
   const agree=(v,n)=>Math.abs(n-(gain*v+offset))<24;
   const agreement=pairs.filter(([v,n])=>agree(v,n)).length/pairs.length;
   if(Math.abs(offset)>60 || agreement<.70) return failed();
-  function map(x,y) {
+  function mapDirect(x,y) {
     if(!Number.isFinite(x) || !Number.isFinite(y) || x<0 || x>1 || y<0 || y>1) return null;
     const bx=x*(w-1),by=y*(h-1),u=px(bx,by),v=py(bx,by);
     if(u<0 || u>w-1 || v<0 || v>h-1) return null;
@@ -188,8 +276,15 @@ export function compareViews(base,next) {
     }
     if(valid<24 || same/valid<.76 || se/valid>17) return null;
     const va=Math.max(0,saa-sa*sa/valid),vb=Math.max(0,sbb-sb*sb/valid);
-    if(va>valid*100 && (vb<valid*16 || (sab-sa*sb/valid)/Math.sqrt(va*vb)<.62)) return null;
+    // A flat foreground patch can have the same mean as a softly textured wall.
+    if(vb<valid*2.25 || (va>valid*100 && (vb<valid*16 || (sab-sa*sb/valid)/Math.sqrt(va*vb)<.62))) return null;
     return {x:u/(w-1),y:v/(h-1)};
+  }
+  function map(x,y) {
+    const direct=mapDirect(x,y);
+    if(direct) return direct;
+    const u=px(x*(w-1),y*(h-1))/(w-1),v=py(x*(w-1),y*(h-1))/(h-1);
+    return refineAnchor(base,next,{x,y},{x:u,y:v,a:t.a,b:t.b});
   }
   function inFrame(x,y) {
     const u=px(x*(w-1),y*(h-1)), v=py(x*(w-1),y*(h-1));

@@ -3,6 +3,8 @@ let startup;
 let sequence = 0;
 let busy = false;
 let scratch;
+const portraitSearchSizes = [960, 720, 600];
+let portraitSearch = {next: 0};
 const requests = new Map();
 
 function stopWorker(reason) {
@@ -27,6 +29,7 @@ function send(type, payload = {}, transferable = []) {
 }
 
 export function clearLocalMap() {
+  portraitSearch = {next: 0};
   stopWorker(new Error('Карта выгружена'));
   // Canvas pixels from the last frame are not needed when a map is unloaded.
   if (scratch) { scratch.width=0; scratch.height=0; scratch=undefined; }
@@ -61,6 +64,7 @@ export async function initRecognizer() {
 }
 
 export function resetTracking() {
+  portraitSearch = {next: 0};
   worker?.postMessage({type:'reset'});
 }
 
@@ -70,7 +74,12 @@ export async function recognizeFrame(canvas, {continuous=false} = {}) {
   try {
     await initRecognizer();
     if (!canvas.width || !canvas.height) throw new Error('Кадр ещё не готов');
-    const scale = Math.min(1, 960 / Math.max(canvas.width, canvas.height));
+    // A tightly framed window may match at a different feature scale. Try one
+    // resolution per new video frame, starting at full size for each session.
+    const search = portraitSearch;
+    const usePortraitSearch = continuous && canvas.height > canvas.width && canvas.height > 720;
+    const attempt = usePortraitSearch ? search.next : 0;
+    const scale = Math.min(1, portraitSearchSizes[attempt] / Math.max(canvas.width, canvas.height));
     const width = Math.max(1, Math.round(canvas.width * scale));
     const height = Math.max(1, Math.round(canvas.height * scale));
     if (!scratch) scratch = document.createElement('canvas');
@@ -81,7 +90,19 @@ export async function recognizeFrame(canvas, {continuous=false} = {}) {
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(canvas, 0, 0, width, height);
     const { buffer } = ctx.getImageData(0, 0, width, height).data;
-    return await send('frame', { buffer, width, height, continuous }, [buffer]);
+    const result = await send('frame', { buffer, width, height, continuous: continuous && attempt === 0 }, [buffer]);
+    if (usePortraitSearch) {
+      search.next = result.anchors.length ? 0 : (attempt + 1) % portraitSearchSizes.length;
+    } else {
+      search.next = 0;
+    }
+    if (attempt && result.anchors.length) {
+      // These close views can localize a label in the image without resolving depth.
+      result.anchors = result.anchors.map(anchor => ({...anchor, distanceM: null}));
+      result.diagnostics.metricRangeReliable = false;
+      delete result.diagnostics.scanCenterM;
+    }
+    return result;
   } finally {
     busy = false;
   }
