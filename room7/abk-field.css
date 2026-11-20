@@ -1,0 +1,30 @@
+#abkFieldPage {max-width:760px;margin:0 auto}
+#abkFieldPage [hidden] {display:none!important}
+#abkFieldPage .heading {margin-bottom:14px}
+#abkFieldPage .heading h1 {font-size:clamp(30px,6vw,48px);margin-bottom:6px}
+#abkFieldPage .heading p,.abk-hint,#abkTagSetup p {line-height:1.48}
+.abk-methods,.abk-field-actions {display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.abk-methods {margin-bottom:16px}
+.abk-methods a {font-size:14px;color:var(--green);border:1px solid var(--line);border-radius:18px;padding:8px 14px;text-decoration:none}
+.abk-methods a[aria-current="page"] {color:white;background:var(--green);border-color:var(--green)}
+.abk-primary {display:block;width:100%;min-height:46px;padding:12px 16px;color:white;background:var(--green);border-radius:11px;font-weight:600;font-size:15px}
+#abkStartCamera {margin-top:12px}
+.abk-primary:disabled {background:#dce2d7;color:#47564b;cursor:default}
+.abk-place {font-weight:600;margin:12px 0 8px}
+#abkLiveView {position:relative;isolation:isolate;width:100%;height:clamp(250px,54svh,570px);background:#17281e;border-radius:16px;overflow:hidden}
+#abkFieldVideo,#abkFieldLabels {position:absolute;inset:0;width:100%;height:100%}
+#abkFieldVideo {object-fit:contain;object-position:center}
+#abkFieldLabels {overflow:hidden;pointer-events:none}
+#abkFieldLabels button {position:absolute;pointer-events:auto;background:#d7eda2;color:#173728;padding:8px 12px;border-radius:12px;box-shadow:0 2px 10px #0003;font-size:15px;font-weight:600;white-space:nowrap;min-height:36px}
+#abkReticle {position:absolute;left:50%;top:50%;width:16px;height:16px;border-radius:100%;border:2px solid #fff;outline:1px solid #254336;transform:translate(-50%,-50%);pointer-events:none}
+.abk-hint {font-size:14px;color:var(--muted);margin:10px 0}
+.abk-hint:empty {display:none}
+#abkAimDetails {margin:13px 0;color:var(--green);font-size:14px}
+#abkAimDetails summary {cursor:pointer}
+.abk-back {display:inline-block;margin:18px 0;color:var(--green);text-underline-offset:3px;font-size:14px}
+#abkPlantCard .meta-row {gap:12px}
+#abkPlantSpot {text-align:right}
+#abkTagSetup {background:var(--panel,#fffef9);border:1px solid var(--line);border-radius:14px;padding:15px}
+#abkTagSetup p {margin:0 0 12px}
+#abkFieldLabels button::after {content:"";position:absolute;top:100%;left:var(--tip,50%);transform:translateX(-50%);border:5px solid transparent;border-bottom:0;border-top-color:#d7eda2}
+#abkFieldLabels button[data-below="true"]::after {top:auto;bottom:100%;border-top:0;border-bottom:5px solid #d7eda2}

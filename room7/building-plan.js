@@ -47,6 +47,7 @@ function drawTree(tree, floor, room) {
 async function displayFloor(level) {
   const ticket = ++revision;
   showTab('building');
+  byId('abkFromFloor').href = '#abk-camera-'+level;
   if (card.open) card.close();
   for (const link of document.querySelectorAll('.abk-floors a')) {
     if (link.dataset.floor === level) link.setAttribute('aria-current','page');
@@ -94,7 +95,7 @@ async function displayFloor(level) {
 function followFloorLink() {
   const level = /^#floor-([12])$/.exec(location.hash);
   if (level) void displayFloor(level[1]);
-  else if (location.hash === '#garden' || tab === 'building') {
+  else if (location.hash === '#garden' || (tab === 'building' && !location.hash.startsWith('#abk-'))) {
     if (card.open) card.close();
     showTab('map');
   }
