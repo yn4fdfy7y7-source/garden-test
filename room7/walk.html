@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#193f33">
+<title>Обход АБК · Сад рядом</title>
+<link rel="stylesheet" href="walk.css">
+</head>
+<body>
+<main>
+<header><a href="./#abk-camera-2-r11">← Камера в АБК</a><strong>Сад рядом</strong></header>
+<h1>Обход АБК</h1>
+<p class="lead">На втором этаже пройдите через дверь между кабинетами № 5 и № 7. Держите телефон в руке. На каждом отмеченном месте подтвердите, что дошли.</p>
+<section class="panel">
+<label class="route" for="walkRoute">Маршрут <select id="walkRoute"><option value="5-to-7">Из кабинета № 5 в № 7</option><option value="7-to-5">Из кабинета № 7 в № 5</option></select></label>
+<h2 id="walkPoint"></h2><p id="walkInstruction"></p>
+<div class="actions"><button id="walkStart" class="primary" disabled>Я на старте · Начать обход</button><button id="walkConfirm" class="primary" hidden>Я у этой точки</button><button id="walkResume" class="primary" hidden>Продолжить обход</button><button id="walkPause" hidden>Пауза</button></div>
+<p id="walkStatus" role="status">Загружаем маршрут…</p>
+<div id="walkMap" aria-label="Маршрут на плане второго этажа"></div>
+<p id="walkMapHint" aria-live="polite" hidden></p>
+<div class="stats" aria-label="Показания обхода">
+<div><small>Координаты на плане</small><strong id="walkCoordinates">—</strong></div>
+<div><small>Шаги</small><strong id="walkSteps">0</strong></div>
+</div>
+<p id="walkSource"></p>
+</section>
+<details class="panel notes" id="walkWifiPanel" hidden>
+<summary>Добавить замер Wi-Fi</summary>
+<p>Safari не передаёт сайту список точек Wi-Fi. Если сняли замер сканером, выберите место, где он сделан, и внесите показания.</p>
+<form id="walkWifiForm">
+<label>Место замера<select id="walkWifiPoint" required></select></label>
+<label>Название сети <input id="walkSsid" maxlength="32" placeholder="SSID" autocomplete="off"></label>
+<label>Адрес точки <input id="walkBssid" required placeholder="BSSID · 00:11:22:33:44:55" autocomplete="off" autocapitalize="none" spellcheck="false"></label>
+<label>Сигнал, дБм <input id="walkRssi" type="number" step="1" min="-127" max="0" placeholder="Например, −55" required></label>
+<button type="submit">Сохранить замер</button><p id="walkWifiStatus" role="status"></p>
+</form></details>
+<section class="panel" id="walkExport" hidden><h2>Запись обхода</h2>
+<p>Трек хранится в этом браузере. В файле у каждой записи есть время и источник координат.</p>
+<div class="actions"><button id="walkDownload" class="primary">Скачать CSV</button><button id="walkShare" hidden>Отправить файл</button><button id="walkNew" hidden>Новый обход</button></div>
+<p id="walkExportStatus" role="status"></p>
+</section>
+<details class="notes"><summary>Как определяются координаты</summary>
+<p>Начало отсчёта X и Y — нижний левый угол рамки плана второго этажа. Нажатие у ориентира ставит вас в его известные координаты. Между ориентирами телефон считает шаги и оценивает пройденное расстояние вдоль заданной линии. Длина шага для первой проверки — 0,7 м. При отклонении от маршрута точка на экране продолжит идти по линии.</p>
+<p>Фоновая вкладка ставит обход на паузу. Для записи держите страницу открытой. Если датчик недоступен, можно сохранять только подтверждённые точки. Данные от MikroTik в эту версию не поступают.</p></details>
+<noscript>Для записи обхода включите JavaScript в браузере.</noscript>
+</main>
+<script type="module" src="walk.js" onerror="document.querySelector('#walkStatus').textContent='Не удалось загрузить обход. Обновите страницу при доступном интернете.'"></script>
+</body>
+</html>
