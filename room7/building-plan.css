@@ -19,3 +19,14 @@
 .abk-caption a{color:var(--green);text-underline-offset:3px}
 #abkCard .meta-row{gap:12px}
 #abkCard .meta-row b{text-align:right}
+
+.abk-card-camera{margin-top:16px;min-height:44px}
+@media(max-width:540px){
+  .abk-tree{min-height:44px}
+  .abk-tree span{font-size:13px}
+  .abk-tree.abk-compact-lower span{transform:translateY(8px)}
+  .abk-tree.abk-compact-right{flex-direction:row;transform:translate(-5px,-50%);padding:0 1px 0 0}
+  .abk-tree[data-tree=t10] span{margin-bottom:8px}
+  .abk-tree[data-tree=t10]::after{content:"";position:absolute;bottom:9px;left:50%;height:9px;border-left:1px solid #315e38;pointer-events:none}
+  .abk-tree.abk-compact-above{flex-direction:column-reverse;transform:translate(-50%,calc(-100% + 5px));min-height:34px;padding:0}
+}

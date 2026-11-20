@@ -11,6 +11,13 @@
 #abkStartCamera {margin-top:12px}
 .abk-primary:disabled {background:#dce2d7;color:#47564b;cursor:default}
 .abk-place {font-weight:600;margin:12px 0 8px}
+#abkFixedPoints {margin-top:12px;padding:12px;background:#e8edde;border-radius:14px;color:var(--green)}
+#abkFixedTitle {margin:0 0 8px;font-size:14px;line-height:1.3;font-weight:600}
+#abkFixedNames {display:flex;flex-wrap:wrap;gap:5px}
+#abkFixedNames button {padding:6px 10px;min-height:36px;background:var(--paper);border:1px solid #bacab8;border-radius:10px;color:var(--green);font-size:14px}
+#abkFixedNames button:focus-visible {outline:2px solid currentColor;outline-offset:1px}
+#abkLivePoints #abkFixedPoints {margin-top:0;background:var(--green);color:white;border-radius:16px 16px 0 0}
+#abkLivePoints:not(:empty) + #abkLiveView {border-radius:0 0 16px 16px}
 #abkLiveView {position:relative;isolation:isolate;width:100%;height:clamp(250px,54svh,570px);background:#17281e;border-radius:16px;overflow:hidden}
 #abkFieldVideo,#abkFieldLabels {position:absolute;inset:0;width:100%;height:100%}
 #abkFieldVideo {object-fit:contain;object-position:center}

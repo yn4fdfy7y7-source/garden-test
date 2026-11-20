@@ -107,7 +107,7 @@ function drawMap(node, level, floor, box, rooms, chosen, origin, aim, cursor, tr
   mark(origin, 'here', '1'); mark(aim, 'there', '2'); mark(cursor, 'cursor', '+');
 }
 
-export function createPlanPicker(container, {floor: initialFloor = '1', roomId = '', onChange = () => {}} = {}) {
+export function createPlanPicker(container, {floor: initialFloor = '1', roomId = '', onChange = () => {}, onFloorPoints = () => {}} = {}) {
   const panel = document.createElement('div');
   panel.className = 'abkl';
   panel.innerHTML = `
@@ -173,6 +173,7 @@ export function createPlanPicker(container, {floor: initialFloor = '1', roomId =
     if (loaded) {
       const floorTrees = trees.filter(t => t.floor === level);
       eligible = plan.rooms.filter(r => r.floor === level && floorTrees.some(t => t.room === r.id));
+      onFloorPoints(level, floorTrees, eligible);
       const sorted = [...eligible].sort((a,b) => a.name.localeCompare(b.name,'ru',{numeric:true}));
       select.replaceChildren(new Option('Весь этаж',''), ...sorted.map(r => new Option(r.name, r.id)));
       zoom = eligible.some(r => r.id === requestedRoom) ? requestedRoom : '';

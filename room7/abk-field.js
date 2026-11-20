@@ -1,4 +1,4 @@
-import { createPlanPicker } from './abk-locate.js?v=start3';
+import { createPlanPicker } from './abk-locate.js?v=pins1';
 import { readPlanOrientationSample, rearCameraOrientation, calibratePlanYaw, projectPlanPoint } from './abk-direction.js?v=aim2';
 
 const el = id => document.getElementById(id);
@@ -64,17 +64,36 @@ async function requestOrientation() {
   if (typeof api.requestPermission !== 'function') return true;
   return await api.requestPermission() === 'granted';
 }
-function showCard(tree) {
-  const s = session;
-  if (!s || !liveVideo() || card.open) return;
-  tick();
-  if (!s.visible.has(tree.id)) return;
-  const room = s.method === 'plan' ? s.selection.roomName : s.tagMap.rooms.get(tree.room);
+function openPlantCard(tree, room) {
+  if (card.open) return;
   el('abkPlantRoom').textContent = tree.floor+' этаж · '+room;
   el('abkPlantName').textContent = tree.name;
   el('abkPlantFact').textContent = tree.fact;
   el('abkPlantSpot').textContent = tree.spot;
   card.showModal();
+}
+function showCard(tree) {
+  const s = session;
+  if (!s || !liveVideo() || card.open) return;
+  tick();
+  if (!s.visible.has(tree.id)) return;
+  openPlantCard(tree, s.method === 'plan' ? s.selection.roomName : s.tagMap.rooms.get(tree.room));
+}
+function renderFixedPoints(floor, trees, rooms) {
+  const names = new Map(rooms.map(room => [room.id, room.name]));
+  el('abkFixedNames').replaceChildren(...trees.map(tree => {
+    const room = names.get(tree.room);
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.dataset.tree = tree.id;
+    button.textContent = tree.name;
+    button.setAttribute('aria-label', tree.name + ' · ' + room);
+    button.setAttribute('aria-haspopup', 'dialog');
+    button.onclick = () => openPlantCard(tree, room);
+    return button;
+  }));
+  el('abkFixedTitle').textContent = 'Точки по плану · ' + floor + ' этаж';
+  el('abkFixedPoints').hidden = method !== 'plan' || trees.length === 0;
 }
 function draw(points) {
   const s = session;
@@ -150,7 +169,7 @@ function sensorInfo(s) {
 function drawPlan(s) {
   if (!s.selection || s.sensorError) {
     removeLabels();fix.disabled=true;
-    say(el('abkLiveStatus'),s.sensorError || 'Камера включена. Для табличек отметьте ниже своё место и видимый ориентир.');
+    say(el('abkLiveStatus'),s.sensorError || 'Чтобы привязать подписи к стенам в кадре, отметьте ниже своё место и видимый ориентир.');
     return;
   }
   const orientation = rearCameraOrientation(s.angles,screenAngle());
@@ -240,6 +259,7 @@ function stopSession(message='') {
   if (card.open) card.close();
   removeLabels();
   live.hidden=true;setup.hidden=false;
+  el('abkSetupPoints').append(el('abkFixedPoints'));
   el('abkSetupPicker').append(el('abkPicker'));
   say(el('abkSetupStatus'),message);
   updateSetup();
@@ -327,6 +347,7 @@ function startSession() {
   say(el('abkLiveStatus'),'Ожидаем камеру…');
   // Both permission requests originate in this tap, even if the plan is loading.
   if (method==='plan') {
+    el('abkLivePoints').append(el('abkFixedPoints'));
     el('abkLivePicker').append(el('abkPicker'));
     applyPlanSelection(s,selection);
     window.addEventListener('deviceorientation',onOrientation);
@@ -381,6 +402,11 @@ function followFieldLink() {
   const url=new URL(location.href);
   if (!url.hash) {
     const queryMode=url.searchParams.get('mode');
+    if (!queryMode) {
+      url.hash = 'floor-2';
+      location.replace(url.href);
+      return;
+    }
     const route={
       abk:'abk-camera', 'abk-tags':'abk-tags', 'room7-photo':'room7-photo',
       live:'garden-camera', demo:'garden-demo'
@@ -406,6 +432,7 @@ function followFieldLink() {
   stopSession();
   if (cameraEngine.ready || cameraEngine.pending || cameraEngine.stream) cameraEngine.stop();
   method=floorMatch?'plan':'tags';
+  el('abkFixedPoints').hidden=true;
   level=floorMatch?.[1] || level;
   const requestedRoom=floorMatch?.[2] || '';
   showTab('abkField');
@@ -415,11 +442,11 @@ function followFieldLink() {
   }
   el('abkPicker').hidden=method!=='plan';el('abkTagSetup').hidden=method!=='tags';
   el('abkFieldIntro').textContent=method==='plan' ?
-    'Включите камеру. Для табличек отметьте на плане своё место и видимый ориентир.' :
+    'Карточки этажа можно открыть сразу. Для наведения на точку отметьте на плане своё место и ориентир.' :
     'Для обхода обоих этажей наведите камеру на метку у растения.';
   el('abkBackToFloor').href='#floor-'+level;
   if (method==='plan') {
-    if (!picker) picker=createPlanPicker(el('abkPicker'),{floor:level,roomId:requestedRoom,onChange:(choice,activeFloor)=>{
+    if (!picker) picker=createPlanPicker(el('abkPicker'),{floor:level,roomId:requestedRoom,onFloorPoints:renderFixedPoints,onChange:(choice,activeFloor)=>{
       level=activeFloor;el('abkBackToFloor').href='#floor-'+level;el('abkPlanMode').href='#abk-camera-'+level;
       if (session?.method==='plan' && choice && !session.selection) {
         applyPlanSelection(session,choice);

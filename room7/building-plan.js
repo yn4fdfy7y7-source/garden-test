@@ -7,6 +7,12 @@ const summary = byId('abkFloorSummary');
 const retry = byId('abkRetry');
 const download = byId('abkDownload');
 const card = byId('abkCard');
+const cameraLink = document.createElement('a');
+cameraLink.className = 'text-button abk-entry abk-card-camera';
+cameraLink.textContent = 'Камера в этом помещении →';
+card.querySelector('.modal-body').append(cameraLink);
+cameraLink.addEventListener('click', () => card.close());
+let opener;
 let mapData;
 let revision = 0;
 
@@ -25,16 +31,22 @@ function drawTree(tree, floor, room) {
   button.dataset.tree = tree.id;
   button.style.left = (x*100)+'%';
   button.style.top = (y*100)+'%';
-  // Put the name on the room's side of the wall. Stagger the close pair in rooms 4 and 6.
+  // Prefer the room side of the wall. On compact plans close neighbours
+  // need separate labels while each dot stays at its measured coordinate.
   const roomX = room.poly.map(([px]) => px);
   const rightHalf = tree.x > (Math.min(...roomX)+Math.max(...roomX))/2;
   if (tree.id === 't10' || (rightHalf && tree.id !== 't13')) button.classList.add('abk-left');
+  if (tree.id === 't02') button.classList.add('abk-compact-lower');
+  if (tree.id === 't06') button.classList.add('abk-compact-right');
+  if (['t08','t10','t11','door_201_closed'].includes(tree.id)) button.classList.add('abk-compact-above');
   button.setAttribute('aria-haspopup','dialog');
   button.setAttribute('aria-label',tree.name+' · '+room.name);
   const label = document.createElement('span');
   label.textContent = tree.name;
   button.append(label);
   button.addEventListener('click', () => {
+    opener = button;
+    cameraLink.href = '#abk-camera-'+tree.floor+'-'+room.id;
     byId('abkName').textContent = tree.name;
     byId('abkRoom').textContent = tree.floor+' этаж · '+room.name;
     byId('abkFact').textContent = tree.fact;
@@ -95,15 +107,19 @@ async function displayFloor(level) {
 function followFloorLink() {
   const level = /^#floor-([12])$/.exec(location.hash);
   if (level) void displayFloor(level[1]);
-  else if (location.hash === '#garden' || (tab === 'building' && !location.hash.startsWith('#abk-'))) {
+  else {
     if (card.open) card.close();
-    showTab('map');
+    if (location.hash === '#garden' || (tab === 'building' && !location.hash.startsWith('#abk-'))) showTab('map');
   }
 }
 
 byId('abkToGarden').onclick = () => { location.hash = 'garden'; };
 byId('abkClose').onclick = () => card.close();
 retry.onclick = followFloorLink;
+card.addEventListener('close', () => {
+  if (opener?.isConnected && /^#floor-[12]$/.test(location.hash)) opener.focus({preventScroll:true});
+  opener = null;
+});
 card.addEventListener('click', event => {
   if (event.target !== card) return;
   const box = card.getBoundingClientRect();
